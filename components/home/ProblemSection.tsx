@@ -1,9 +1,11 @@
 'use client'
 
-import { motion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 import { problem } from '@/lib/home/content'
 
 export function ProblemSection() {
+  const reduceMotion = useReducedMotion()
+
   return (
     <section className="bg-white px-6 py-24">
       <div className="mx-auto max-w-4xl text-center">
@@ -15,8 +17,8 @@ export function ProblemSection() {
         {problem.tarjetas.map((tarjeta, index) => (
           <motion.div
             key={tarjeta}
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={reduceMotion ? undefined : { opacity: 0, y: 16 }}
+            whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: index * 0.1 }}
             className="rounded-2xl border border-[#48556A]/10 bg-[#F4F7FB] p-6"

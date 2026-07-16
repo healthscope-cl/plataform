@@ -1,9 +1,11 @@
 'use client'
 
-import { motion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 import { howItWorks } from '@/lib/home/content'
 
 export function HowItWorks() {
+  const reduceMotion = useReducedMotion()
+
   return (
     <section id="como-funciona" className="bg-[#F4F7FB] px-6 py-24">
       <div className="mx-auto max-w-3xl text-center">
@@ -24,10 +26,10 @@ export function HowItWorks() {
             y2="2"
             stroke="#00B8F5"
             strokeWidth="2"
-            initial={{ pathLength: 0 }}
-            whileInView={{ pathLength: 1 }}
+            initial={reduceMotion ? undefined : { pathLength: 0 }}
+            whileInView={reduceMotion ? undefined : { pathLength: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 1 }}
+            transition={{ duration: 0.6 }}
           />
         </svg>
 
@@ -35,8 +37,8 @@ export function HowItWorks() {
           {howItWorks.pasos.map((paso, index) => (
             <motion.li
               key={paso}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={reduceMotion ? undefined : { opacity: 0, y: 16 }}
+              whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: index * 0.15 }}
               className="relative flex flex-col items-center text-center"
