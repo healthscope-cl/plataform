@@ -42,3 +42,6 @@ next-env.d.ts
 
 # internal source docs (not part of the shipped app)
 /_source/
+
+# subagent-driven-development scratch state
+/.superpowers/
