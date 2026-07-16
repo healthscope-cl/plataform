@@ -40,9 +40,7 @@ const buttonVariants = cva(
   }
 )
 
-interface ButtonProps extends ButtonPrimitive.Props, VariantProps<typeof buttonVariants> {
-  asChild?: boolean
-}
+type ButtonProps = ButtonPrimitive.Props & VariantProps<typeof buttonVariants>
 
 function Button({
   className,

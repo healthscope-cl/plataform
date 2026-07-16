@@ -87,13 +87,11 @@ export function Hero({ onOpenDemo }: HeroProps) {
               {hero.ctaPrimario}
             </Button>
             <Button
-              asChild
               size="lg"
               variant="outline"
               className="rounded-full border-white/30 bg-transparent px-6 text-white hover:bg-white/10"
-            >
-              <a href="#como-funciona">{hero.ctaSecundario}</a>
-            </Button>
+              render={<a href="#como-funciona">{hero.ctaSecundario}</a>}
+            />
           </motion.div>
           <motion.p variants={item} className="mt-6 text-sm text-white/50">
             {hero.microtexto}
