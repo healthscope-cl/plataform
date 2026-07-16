@@ -89,6 +89,7 @@ export function Hero({ onOpenDemo }: HeroProps) {
             <Button
               size="lg"
               variant="outline"
+              nativeButton={false}
               className="rounded-full border-white/30 bg-transparent px-6 text-white hover:bg-white/10"
               render={<a href="#como-funciona">{hero.ctaSecundario}</a>}
             />
