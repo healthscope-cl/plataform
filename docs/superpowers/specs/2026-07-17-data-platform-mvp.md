@@ -106,6 +106,24 @@ asesoría legal, no un número arbitrario), no atribuir toda mejora a una interv
 diseño de evaluación (línea base vs. período posterior), y guardar la metodología por
 cliente para que sea auditable.
 
+## 3.1 Formato del entregable de reportes (MVP vs. después)
+
+El doc maestro (sección 17) lista Web/PDF/Excel controlado/CSV como formatos, y la sección 23
+incluye "Reporte PDF" explícito en el MVP recomendado (ítem 13) — no es opcional para el
+MVP. Para no sub-construir ni sobre-construir:
+
+- **MVP (esta fase, Essential):** un PDF simple generado a partir de la vista actual del
+  dashboard — indicadores + gráficos + filtros aplicados — con la metadata obligatoria de la
+  sección 17 (fuente, fecha, filtros, definiciones, fórmulas, calidad del dato, limitaciones,
+  confidencialidad, versión). Técnicamente: renderizar la misma vista que ya existe en la app
+  a PDF (server-side, ej. Puppeteer/Playwright headless o una librería de PDF en React) — no
+  requiere un motor de reportes aparte.
+- **Fase 3+ (Pro/Enterprise):** múltiples tipos de reporte por audiencia (Ejecutivo, RR.HH.,
+  Prevención, Salud ocupacional, por sucursal/campaña/intervención — la lista completa de la
+  sección 17), Excel controlado, y resúmenes narrativos generados por IA con revisión humana
+  obligatoria (sección 13 — nunca automático). Esto se agrega encima del PDF del MVP, no lo
+  reemplaza.
+
 **Alertas** (motor de reglas con umbrales configurables, no IA): aumento vs. línea base,
 concentración por área o turno, reincidencia, ausencia prolongada, accidentes repetidos,
 cambio estacional inesperado, baja participación en campaña, intervención sin seguimiento,
