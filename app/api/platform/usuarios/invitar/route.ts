@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     .eq('id', user.id)
     .single()
 
-  if (!caller || !isAdminRole(caller.roles.clave)) {
+  if (!caller || !isAdminRole(caller.roles.clave) || caller.estado !== 'activo') {
     return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
   }
 
@@ -45,6 +45,13 @@ export async function POST(request: Request) {
 
   if (rolError || !rolRow) {
     return NextResponse.json({ error: 'Rol inválido' }, { status: 400 })
+  }
+
+  if (rolClave === 'superadmin' && caller.roles.clave !== 'superadmin') {
+    return NextResponse.json(
+      { error: 'Solo superadmin puede asignar el rol superadmin' },
+      { status: 403 }
+    )
   }
 
   const { data: created, error: createError } = await admin.auth.admin.inviteUserByEmail(email)
