@@ -36,7 +36,7 @@ export function ImpactCalculator() {
 
   function handleChange(key: keyof ImpactCalculatorInput, raw: string) {
     const valor = Number(raw)
-    const parsed = Number.isFinite(valor) ? valor : 0
+    const parsed = Number.isFinite(valor) ? Math.max(0, valor) : 0
     setInput((prev) => ({
       ...prev,
       [key]: key === 'mejoraHipotetica' ? parsed / 100 : parsed,
