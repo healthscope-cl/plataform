@@ -1,14 +1,16 @@
+'use client'
+
 import { Lock } from 'lucide-react'
-import { privacy } from '@/lib/home/content'
+import { useHomeContent } from '@/lib/home/LocaleProvider'
 
 export function PrivacySection() {
+  const { privacy } = useHomeContent()
+
   return (
     <section id="privacidad" className="bg-[#F4F7FB] px-6 py-24">
       <div className="mx-auto max-w-3xl text-center">
         <h2 className="font-heading text-3xl font-bold text-[#101827] md:text-4xl">{privacy.titulo}</h2>
-        <p className="mt-4 text-sm text-[#48556A]">
-          Diseñada para apoyar el cumplimiento de la Ley 21.719 de protección de datos personales.
-        </p>
+        <p className="mt-4 text-sm text-[#48556A]">{privacy.disclaimer}</p>
       </div>
 
       <div className="mx-auto mt-12 grid max-w-4xl gap-4 sm:grid-cols-2">

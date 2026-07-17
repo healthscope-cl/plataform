@@ -1,13 +1,15 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { closing } from '@/lib/home/content'
+import { useHomeContent } from '@/lib/home/LocaleProvider'
 
 interface ClosingCtaProps {
   onOpenDemo: () => void
 }
 
 export function ClosingCta({ onOpenDemo }: ClosingCtaProps) {
+  const { closing } = useHomeContent()
+
   return (
     <section id="cierre" className="bg-[#03142F] px-6 py-24 text-center">
       <div className="mx-auto max-w-2xl">

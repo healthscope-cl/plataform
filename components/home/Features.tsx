@@ -1,3 +1,5 @@
+'use client'
+
 import {
   Activity,
   Tags,
@@ -12,7 +14,7 @@ import {
   ShieldCheck,
   ClipboardCheck,
 } from 'lucide-react'
-import { features } from '@/lib/home/content'
+import { useHomeContent } from '@/lib/home/LocaleProvider'
 
 const icons = [
   Activity,
@@ -30,6 +32,8 @@ const icons = [
 ]
 
 export function Features() {
+  const { features } = useHomeContent()
+
   return (
     <section className="bg-white px-6 py-24">
       <div className="mx-auto max-w-3xl text-center">

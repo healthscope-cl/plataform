@@ -1,15 +1,16 @@
 'use client'
 
 import { motion, useReducedMotion } from 'motion/react'
-import { howItWorks } from '@/lib/home/content'
+import { useHomeContent } from '@/lib/home/LocaleProvider'
 
 export function HowItWorks() {
+  const { howItWorks } = useHomeContent()
   const reduceMotion = useReducedMotion()
 
   return (
     <section id="como-funciona" className="bg-[#F4F7FB] px-6 py-24">
       <div className="mx-auto max-w-3xl text-center">
-        <h2 className="font-heading text-3xl font-bold text-[#101827] md:text-4xl">Cómo funciona</h2>
+        <h2 className="font-heading text-3xl font-bold text-[#101827] md:text-4xl">{howItWorks.titulo}</h2>
       </div>
 
       <div className="relative mx-auto mt-16 max-w-5xl">

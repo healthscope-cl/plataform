@@ -1,7 +1,11 @@
+'use client'
+
 import { ShieldCheck } from 'lucide-react'
-import { trustStrip } from '@/lib/home/content'
+import { useHomeContent } from '@/lib/home/LocaleProvider'
 
 export function TrustStrip() {
+  const { trustStrip } = useHomeContent()
+
   return (
     <section className="bg-[#F4F7FB] px-6 py-10">
       <ul className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-10 gap-y-4">

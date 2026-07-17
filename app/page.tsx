@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
 import { HomeClientShell } from '@/components/home/HomeClientShell'
-import { seo } from '@/lib/home/content'
+import { contentByLocale } from '@/lib/home/content'
 
 export const metadata: Metadata = {
-  title: seo.title,
-  description: seo.description,
+  title: contentByLocale.es.seo.title,
+  description: contentByLocale.es.seo.description,
 }
 
 export default function Home() {

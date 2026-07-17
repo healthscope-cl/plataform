@@ -9,6 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
+import { useHomeContent } from '@/lib/home/LocaleProvider'
 
 const demoSchema = z.object({
   nombre: z.string().min(1, 'Requerido'),
@@ -26,6 +27,7 @@ interface DemoRequestSheetProps {
 }
 
 export function DemoRequestSheet({ open, onOpenChange }: DemoRequestSheetProps) {
+  const { demoSheet } = useHomeContent()
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle')
 
   const form = useForm<DemoFormValues>({
@@ -64,12 +66,12 @@ export function DemoRequestSheet({ open, onOpenChange }: DemoRequestSheetProps) 
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>Solicitar demostración</SheetTitle>
-          <SheetDescription>Cuéntanos quién eres y te contactaremos para coordinar una demostración.</SheetDescription>
+          <SheetTitle>{demoSheet.titulo}</SheetTitle>
+          <SheetDescription>{demoSheet.descripcion}</SheetDescription>
         </SheetHeader>
 
         {status === 'success' ? (
-          <p className="px-4 py-6 text-sm text-[#38D978]">Gracias, te contactaremos pronto.</p>
+          <p className="px-4 py-6 text-sm text-[#38D978]">{demoSheet.exito}</p>
         ) : (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-4 py-6">
@@ -78,7 +80,7 @@ export function DemoRequestSheet({ open, onOpenChange }: DemoRequestSheetProps) 
                 name="nombre"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nombre</FormLabel>
+                    <FormLabel>{demoSheet.campos.nombre}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -91,7 +93,7 @@ export function DemoRequestSheet({ open, onOpenChange }: DemoRequestSheetProps) 
                 name="empresa"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Empresa</FormLabel>
+                    <FormLabel>{demoSheet.campos.empresa}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -104,7 +106,7 @@ export function DemoRequestSheet({ open, onOpenChange }: DemoRequestSheetProps) 
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>{demoSheet.campos.email}</FormLabel>
                     <FormControl>
                       <Input type="email" {...field} />
                     </FormControl>
@@ -117,7 +119,7 @@ export function DemoRequestSheet({ open, onOpenChange }: DemoRequestSheetProps) 
                 name="telefono"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Teléfono (opcional)</FormLabel>
+                    <FormLabel>{demoSheet.campos.telefono}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -130,7 +132,7 @@ export function DemoRequestSheet({ open, onOpenChange }: DemoRequestSheetProps) 
                 name="cargo"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Cargo (opcional)</FormLabel>
+                    <FormLabel>{demoSheet.campos.cargo}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -139,14 +141,14 @@ export function DemoRequestSheet({ open, onOpenChange }: DemoRequestSheetProps) 
                 )}
               />
 
-              {status === 'error' && <p className="text-sm text-destructive">No pudimos enviar tu solicitud. Intenta de nuevo.</p>}
+              {status === 'error' && <p className="text-sm text-destructive">{demoSheet.error}</p>}
 
               <Button
                 type="submit"
                 disabled={form.formState.isSubmitting}
                 className="w-full rounded-full bg-[#1455E6] hover:bg-[#1455E6]/90"
               >
-                {form.formState.isSubmitting ? 'Enviando…' : 'Enviar solicitud'}
+                {form.formState.isSubmitting ? demoSheet.enviando : demoSheet.enviar}
               </Button>
             </form>
           </Form>

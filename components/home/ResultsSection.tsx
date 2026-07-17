@@ -1,15 +1,10 @@
 'use client'
 
 import { motion, useReducedMotion } from 'motion/react'
-import { results } from '@/lib/home/content'
-
-const barras = [
-  { label: 'Línea base', valor: 68, color: '#48556A' },
-  { label: 'Intervención', valor: 52, color: '#00B8F5' },
-  { label: 'Actual', valor: 41, color: '#38D978' },
-]
+import { useHomeContent } from '@/lib/home/LocaleProvider'
 
 export function ResultsSection() {
+  const { results } = useHomeContent()
   const reduceMotion = useReducedMotion()
 
   return (
@@ -17,12 +12,12 @@ export function ResultsSection() {
       <div className="mx-auto max-w-3xl text-center">
         <h2 className="font-heading text-3xl font-bold text-[#101827] md:text-4xl">{results.titulo}</h2>
         <p className="mt-2 text-xs font-medium uppercase tracking-wide text-[#48556A]/60">
-          {results.etiquetaDemo} — período de comparación: 6 meses
+          {results.etiquetaDemo} — {results.periodoComparacion}
         </p>
       </div>
 
       <div className="mx-auto mt-14 flex max-w-2xl items-end justify-center gap-10">
-        {barras.map((barra, index) => (
+        {results.barras.map((barra, index) => (
           <div key={barra.label} className="flex flex-col items-center gap-3">
             <motion.div
               initial={reduceMotion ? { height: `${barra.valor * 2}px` } : { height: 0 }}

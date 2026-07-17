@@ -1,9 +1,10 @@
 'use client'
 
 import { motion, useReducedMotion } from 'motion/react'
-import { problem } from '@/lib/home/content'
+import { useHomeContent } from '@/lib/home/LocaleProvider'
 
 export function ProblemSection() {
+  const { problem } = useHomeContent()
   const reduceMotion = useReducedMotion()
 
   return (

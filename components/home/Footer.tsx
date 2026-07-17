@@ -1,7 +1,11 @@
-import { footer } from '@/lib/home/content'
+'use client'
+
+import { useHomeContent } from '@/lib/home/LocaleProvider'
 import Image from 'next/image'
 
 export function Footer() {
+  const { footer } = useHomeContent()
+
   return (
     <footer className="bg-[#03142F] px-6 py-16 text-white/70">
       <div className="mx-auto grid max-w-7xl gap-12 md:grid-cols-3">
@@ -14,7 +18,7 @@ export function Footer() {
         </div>
 
         <div>
-          <h3 className="font-heading text-sm font-semibold text-white">Producto</h3>
+          <h3 className="font-heading text-sm font-semibold text-white">{footer.productoTitulo}</h3>
           <ul className="mt-4 space-y-2">
             {footer.producto.map((item) => (
               <li key={item.label}>
@@ -27,11 +31,11 @@ export function Footer() {
         </div>
 
         <div>
-          <h3 className="font-heading text-sm font-semibold text-white">Legal</h3>
+          <h3 className="font-heading text-sm font-semibold text-white">{footer.legalTitulo}</h3>
           <ul className="mt-4 space-y-2">
             {footer.legal.map((item) => (
               <li key={item} className="text-sm text-white/40">
-                {item} <span className="text-xs">(próximamente)</span>
+                {item} <span className="text-xs">{footer.proximamente}</span>
               </li>
             ))}
           </ul>

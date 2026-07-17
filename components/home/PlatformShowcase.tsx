@@ -1,6 +1,10 @@
-import { platformShowcase } from '@/lib/home/content'
+'use client'
+
+import { useHomeContent } from '@/lib/home/LocaleProvider'
 
 export function PlatformShowcase() {
+  const { platformShowcase } = useHomeContent()
+
   return (
     <section id="plataforma" className="bg-[#03142F] px-6 py-24">
       <div className="mx-auto grid max-w-6xl items-center gap-12 md:grid-cols-2">

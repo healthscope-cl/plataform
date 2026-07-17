@@ -17,12 +17,13 @@ import { Faq } from '@/components/home/Faq'
 import { ClosingCta } from '@/components/home/ClosingCta'
 import { Footer } from '@/components/home/Footer'
 import { DemoRequestSheet } from '@/components/home/DemoRequestSheet'
+import { LocaleProvider } from '@/lib/home/LocaleProvider'
 
 export function HomeClientShell() {
   const [demoOpen, setDemoOpen] = useState(false)
 
   return (
-    <>
+    <LocaleProvider>
       <Header onOpenDemo={() => setDemoOpen(true)} />
       <main>
         <Hero onOpenDemo={() => setDemoOpen(true)} />
@@ -41,6 +42,6 @@ export function HomeClientShell() {
       </main>
       <Footer />
       <DemoRequestSheet open={demoOpen} onOpenChange={setDemoOpen} />
-    </>
+    </LocaleProvider>
   )
 }

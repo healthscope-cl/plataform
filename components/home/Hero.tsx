@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from 'motion/react'
 import { Button } from '@/components/ui/button'
-import { hero } from '@/lib/home/content'
+import { useHomeContent } from '@/lib/home/LocaleProvider'
 
 interface HeroProps {
   onOpenDemo: () => void
@@ -51,6 +51,7 @@ function NodesBackground() {
 }
 
 export function Hero({ onOpenDemo }: HeroProps) {
+  const { hero } = useHomeContent()
   const reduceMotion = useReducedMotion()
 
   return (

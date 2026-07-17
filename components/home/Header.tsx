@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { nav } from '@/lib/home/content'
+import { useHomeContent } from '@/lib/home/LocaleProvider'
+import { LanguageSwitcher } from '@/components/home/LanguageSwitcher'
 import { cn } from '@/lib/utils'
 
 interface HeaderProps {
@@ -12,6 +13,7 @@ interface HeaderProps {
 }
 
 export function Header({ onOpenDemo }: HeaderProps) {
+  const { nav } = useHomeContent()
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -42,7 +44,7 @@ export function Header({ onOpenDemo }: HeaderProps) {
               <span
                 key={link.label}
                 aria-disabled="true"
-                title="Próximamente"
+                title={nav.proximamente}
                 className="cursor-not-allowed text-sm text-white/40"
               >
                 {link.label}
@@ -60,6 +62,7 @@ export function Header({ onOpenDemo }: HeaderProps) {
         </nav>
 
         <div className="flex items-center gap-3">
+          <LanguageSwitcher className="hidden sm:flex" />
           <Link
             href={nav.ingresar.href}
             className="text-sm text-white/80 transition-colors hover:text-[#00B8F5]"
