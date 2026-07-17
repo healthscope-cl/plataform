@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -32,6 +32,13 @@ export function DemoRequestSheet({ open, onOpenChange }: DemoRequestSheetProps) 
     resolver: zodResolver(demoSchema),
     defaultValues: { nombre: '', empresa: '', email: '', telefono: '', cargo: '' },
   })
+
+  useEffect(() => {
+    if (!open) {
+      setStatus('idle')
+      form.reset()
+    }
+  }, [open, form])
 
   async function onSubmit(values: DemoFormValues) {
     setStatus('idle')
@@ -132,7 +139,7 @@ export function DemoRequestSheet({ open, onOpenChange }: DemoRequestSheetProps) 
                 )}
               />
 
-              {status === 'error' && <p className="text-sm text-red-500">No pudimos enviar tu solicitud. Intenta de nuevo.</p>}
+              {status === 'error' && <p className="text-sm text-destructive">No pudimos enviar tu solicitud. Intenta de nuevo.</p>}
 
               <Button
                 type="submit"
