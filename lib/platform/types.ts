@@ -217,3 +217,28 @@ export function mapAuditoriaRow(row: {
     datosDespues: row.datos_despues,
   }
 }
+
+export function mapRolRow(row: { id: string; clave: string; nombre: string; descripcion: string }): Rol {
+  return {
+    id: row.id,
+    clave: row.clave,
+    nombre: row.nombre,
+    descripcion: row.descripcion,
+  }
+}
+
+export function mapEmpresaRow(row: {
+  id: string
+  tenant_id: string
+  created_at: string
+  nombre: string
+  rut: string | null
+}): Empresa {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    createdAt: row.created_at,
+    nombre: row.nombre,
+    rut: row.rut,
+  }
+}
