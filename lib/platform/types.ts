@@ -144,3 +144,76 @@ export function mapTurnoRow(row: {
     horaFin: row.hora_fin,
   }
 }
+
+export type Rol = {
+  id: string
+  clave: string
+  nombre: string
+  descripcion: string
+}
+
+export type Usuario = {
+  id: string
+  tenantId: string
+  createdAt: string
+  nombre: string
+  email: string
+  estado: 'activo' | 'inactivo'
+  rolId: string
+}
+
+export type Auditoria = {
+  id: string
+  tenantId: string
+  createdAt: string
+  actorId: string
+  entidad: string
+  entidadId: string
+  accion: 'crear' | 'actualizar' | 'eliminar'
+  datosAntes: unknown
+  datosDespues: unknown
+}
+
+export function mapUsuarioRow(row: {
+  id: string
+  tenant_id: string
+  created_at: string
+  nombre: string
+  email: string
+  estado: 'activo' | 'inactivo'
+  rol_id: string
+}): Usuario {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    createdAt: row.created_at,
+    nombre: row.nombre,
+    email: row.email,
+    estado: row.estado,
+    rolId: row.rol_id,
+  }
+}
+
+export function mapAuditoriaRow(row: {
+  id: string
+  tenant_id: string
+  created_at: string
+  actor_id: string
+  entidad: string
+  entidad_id: string
+  accion: 'crear' | 'actualizar' | 'eliminar'
+  datos_antes: unknown
+  datos_despues: unknown
+}): Auditoria {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    createdAt: row.created_at,
+    actorId: row.actor_id,
+    entidad: row.entidad,
+    entidadId: row.entidad_id,
+    accion: row.accion,
+    datosAntes: row.datos_antes,
+    datosDespues: row.datos_despues,
+  }
+}
