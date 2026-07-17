@@ -270,3 +270,88 @@ grant select, insert, update, delete on empresas, sucursales, unidades, centros_
 grant select, update on usuarios to authenticated;
 grant select, insert on auditoria to authenticated;
 grant all on tenants, empresas, sucursales, unidades, centros_costo, cargos, turnos, roles, usuarios, auditoria to service_role;
+
+-- ============================================================
+-- INGESTION: tipos administrativos, personas, contratos
+-- ============================================================
+
+create table tipos_administrativos (
+  id uuid primary key default gen_random_uuid(),
+  clave text not null unique,
+  nombre text not null
+);
+
+alter table tipos_administrativos enable row level security;
+
+create policy "tipos_administrativos_select_authenticated" on tipos_administrativos
+  for select to authenticated using (true);
+
+grant select on tipos_administrativos to authenticated;
+grant all on tipos_administrativos to service_role;
+
+-- Fixed catalog from the master doc's legal leave-type taxonomy (section 12). Clave is the
+-- stable key classification.ts and validate.ts check against.
+insert into tipos_administrativos (clave, nombre) values
+  ('enfermedad_comun', 'Enfermedad o accidente común'),
+  ('prorroga_medicina_preventiva', 'Prórroga de medicina preventiva'),
+  ('maternal', 'Maternal'),
+  ('enfermedad_grave_hijo_menor', 'Enfermedad grave de hijo menor'),
+  ('accidente_laboral', 'Accidente laboral'),
+  ('accidente_trayecto', 'Accidente de trayecto'),
+  ('enfermedad_profesional', 'Enfermedad profesional'),
+  ('patologia_embarazo', 'Patología del embarazo'),
+  ('permiso_administrativo', 'Permiso administrativo'),
+  ('ausencia_injustificada', 'Ausencia injustificada'),
+  ('vacaciones', 'Vacaciones'),
+  ('otros', 'Otros');
+
+create table personas (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  empresa_id uuid not null references empresas(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  codigo text not null,
+  rut_hash text not null,
+  unidad_id uuid references unidades(id),
+  cargo_id uuid references cargos(id),
+  turno_id uuid references turnos(id),
+  estado text not null default 'activo' check (estado in ('activo', 'inactivo')),
+  unique (tenant_id, rut_hash)
+);
+
+alter table personas enable row level security;
+
+create policy "personas_select_same_tenant" on personas
+  for select to authenticated using (tenant_id = auth_tenant_id());
+
+create policy "personas_write_admin" on personas
+  for all to authenticated
+  using (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']))
+  with check (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']));
+
+grant select, insert, update, delete on personas to authenticated;
+grant all on personas to service_role;
+
+create table contratos (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  persona_id uuid not null references personas(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  fecha_inicio date not null,
+  fecha_fin date,
+  tipo_contrato text not null default 'indefinido' check (tipo_contrato in ('indefinido', 'plazo_fijo', 'obra_o_faena')),
+  jornada_horas_semanales numeric not null default 45
+);
+
+alter table contratos enable row level security;
+
+create policy "contratos_select_same_tenant" on contratos
+  for select to authenticated using (tenant_id = auth_tenant_id());
+
+create policy "contratos_write_admin" on contratos
+  for all to authenticated
+  using (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']))
+  with check (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']));
+
+grant select, insert, update, delete on contratos to authenticated;
+grant all on contratos to service_role;
