@@ -34,8 +34,20 @@ propósito — el sitio público no requiere sesión.
 - Panel de administración para ver las solicitudes de demo — se revisan directo en el
   dashboard de Supabase.
 - Internacionalización (inglés) — solo español por ahora.
-- Fotografía real — se usa un tratamiento ilustrado/abstracto en su lugar (ver Sistema
-  visual).
+
+## Actualización 2026-07-17 — fotografía de personas
+
+La versión original de este spec optó por tratamiento 100% ilustrado/abstracto (sin fotos)
+para simplificar la Fase 1. El usuario pidió revertir esto a lo que ya indicaba la sección
+8.2 del doc maestro: foto real de trabajadores/jefaturas en el Hero, recortada en forma
+orgánica, con 2-3 tarjetas de indicadores superpuestas — estilo de referencia: Aino Health,
+Honeydew, RioMed (capturas en `referencia/`, no copiar forma ni interfaz literal).
+
+Como no se pueden usar fotos de bancos de imágenes de personas reales identificables sin
+licencia ni fotos de las empresas de referencia, las imágenes se generan con IA (estilo
+fotorrealista, dirección de arte propia) vía el agente `visual-asset-generator`. Ver
+`components/home/Hero.tsx` y `public/images/` para el resultado — actualizar este spec con
+la ruta final y el prompt usado una vez cerrado.
 
 ## Sistema visual
 
