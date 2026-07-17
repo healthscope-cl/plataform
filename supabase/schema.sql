@@ -258,3 +258,15 @@ insert into roles (clave, nombre, descripcion) values
   ('auditor', 'Auditor', 'Solo lectura, incluye el log de auditoría completo'),
   ('trabajador', 'Trabajador', 'Accede a campañas, encuestas y su propia información'),
   ('solo_lectura', 'Solo lectura', 'Ve el dashboard y reportes sin poder editar nada');
+
+-- Base grants missing since these tables were created via raw SQL (not Supabase migrations),
+-- same root cause Task 14 found for demo_requests/anon: RLS policies only apply after the
+-- base SQL privilege exists. RLS above already gates rows/operations correctly per role;
+-- these grants only unlock the base privilege it depends on. Discovered when the live
+-- service_role couldn't write to usuarios and authenticated had zero grants on any platform
+-- table (Task 11 manual verification never actually ran, so nothing had exercised these paths).
+grant select on tenants, roles to authenticated;
+grant select, insert, update, delete on empresas, sucursales, unidades, centros_costo, cargos, turnos to authenticated;
+grant select, update on usuarios to authenticated;
+grant select, insert on auditoria to authenticated;
+grant all on tenants, empresas, sucursales, unidades, centros_costo, cargos, turnos, roles, usuarios, auditoria to service_role;
