@@ -124,4 +124,32 @@ describe('validateRows', () => {
     expect(result.resumen.criticos).toBe(0)
     expect(result.resumen.advertencias).toBe(0)
   })
+
+  it('flags same-start/different-end periods as both fila_duplicada warning and periodo_superpuesto critical', () => {
+    const result = validateRows({
+      rows: [
+        {
+          rut: '12345678-9',
+          fechaInicio: '2026-01-05',
+          // no fechaFin, so fin defaults to fechaInicio
+          dias: 1,
+          tipoAdministrativo: 'enfermedad_comun',
+        },
+        {
+          rut: '12345678-9',
+          fechaInicio: '2026-01-05',
+          fechaFin: '2026-01-10', // different end date
+          dias: 6,
+          tipoAdministrativo: 'enfermedad_comun',
+        },
+      ],
+      tiposValidos,
+    })
+    const row1Errors = result.filaErrors.get(1) ?? []
+    expect(row1Errors).toHaveLength(2)
+    expect(row1Errors.some((e) => e.tipo === 'fila_duplicada' && e.severidad === 'advertencia')).toBe(true)
+    expect(row1Errors.some((e) => e.tipo === 'periodo_superpuesto' && e.severidad === 'critico')).toBe(true)
+    expect(result.resumen.criticos).toBe(1)
+    expect(result.resumen.advertencias).toBe(1)
+  })
 })
