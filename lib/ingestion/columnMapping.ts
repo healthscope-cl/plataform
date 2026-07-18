@@ -20,13 +20,33 @@ function normalize(value: string): string {
     .toLowerCase()
 }
 
+// NOTE: fields are resolved independently and sequentially, so if two canonical fields'
+// alias lists ever overlapped (they don't today), the same header could be assigned to
+// both fields. This function does not dedupe across fields, only within a single field's
+// candidates — acceptable because these are suggestions the user confirms/overrides in
+// the import wizard, not final assignments.
 export function suggestColumnMapping(headers: string[]): Record<CanonicalField, string | null> {
   const normalizedHeaders = headers.map((header) => ({ header, normalized: normalize(header) }))
   const result = {} as Record<CanonicalField, string | null>
 
   for (const field of CANONICAL_FIELDS) {
-    const aliases = ALIASES[field]
-    const match = normalizedHeaders.find((candidate) => aliases.includes(candidate.normalized))
+    const aliases = ALIASES[field].map((alias) => normalize(alias))
+
+    // Tier 1 & 2: exact match, then case/accent-insensitive match (both collapse to the
+    // same normalized-string-equality check once both sides are normalized).
+    let match = normalizedHeaders.find((candidate) => aliases.includes(candidate.normalized))
+
+    // Tier 3: substring match. Permissive by design (bidirectional) since this is only a
+    // suggestion the user confirms/overrides in the wizard UI — being generous here is
+    // safer than being strict and missing a plausible mapping.
+    if (!match) {
+      match = normalizedHeaders.find((candidate) =>
+        aliases.some(
+          (alias) => candidate.normalized.includes(alias) || alias.includes(candidate.normalized)
+        )
+      )
+    }
+
     result[field] = match?.header ?? null
   }
 
