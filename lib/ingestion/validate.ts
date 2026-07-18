@@ -77,8 +77,9 @@ export function validateRows(input: { rows: MappedRow[]; tiposValidos: string[] 
 
     const periods = periodsByRut.get(row.rut) ?? []
     for (const previous of periods) {
+      const isSamePeriod = previous.inicio === row.fechaInicio && previous.fin === fin
       const overlaps = new Date(row.fechaInicio) <= new Date(previous.fin) && new Date(fin) >= new Date(previous.inicio)
-      if (overlaps) {
+      if (overlaps && !isSamePeriod) {
         addError(filaErrors, fila, {
           tipo: 'periodo_superpuesto',
           severidad: 'critico',

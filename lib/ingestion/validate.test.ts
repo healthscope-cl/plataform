@@ -54,7 +54,39 @@ describe('validateRows', () => {
       tiposValidos,
     })
     expect(result.filaErrors.get(0)).toBeUndefined()
-    expect(result.filaErrors.get(1)?.[0]).toEqual({ tipo: 'fila_duplicada', severidad: 'advertencia', mensaje: expect.any(String) })
+    const duplicateRowErrors = result.filaErrors.get(1) ?? []
+    expect(duplicateRowErrors).toHaveLength(1)
+    expect(duplicateRowErrors[0]).toEqual({ tipo: 'fila_duplicada', severidad: 'advertencia', mensaje: expect.any(String) })
+    expect(duplicateRowErrors.some((e) => e.severidad === 'critico')).toBe(false)
+    expect(result.resumen.advertencias).toBe(1)
+    expect(result.resumen.criticos).toBe(0)
+  })
+
+  it('does not flag an exact-duplicate period as periodo_superpuesto (only as fila_duplicada)', () => {
+    const result = validateRows({
+      rows: [
+        {
+          rut: '12345678-9',
+          fechaInicio: '2026-01-05',
+          fechaFin: '2026-01-10',
+          dias: 6,
+          tipoAdministrativo: 'enfermedad_comun',
+        },
+        {
+          rut: '12345678-9',
+          fechaInicio: '2026-01-05',
+          fechaFin: '2026-01-10',
+          dias: 6,
+          tipoAdministrativo: 'enfermedad_comun',
+        },
+      ],
+      tiposValidos,
+    })
+    const duplicateRowErrors = result.filaErrors.get(1) ?? []
+    expect(duplicateRowErrors).toHaveLength(1)
+    expect(duplicateRowErrors[0].tipo).toBe('fila_duplicada')
+    expect(duplicateRowErrors.some((e) => e.tipo === 'periodo_superpuesto')).toBe(false)
+    expect(result.resumen.criticos).toBe(0)
     expect(result.resumen.advertencias).toBe(1)
   })
 
