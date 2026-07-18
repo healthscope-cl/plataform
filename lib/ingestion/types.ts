@@ -101,3 +101,127 @@ export function mapContratoRow(row: {
     jornadaHorasSemanales: row.jornada_horas_semanales,
   }
 }
+
+export type Importacion = {
+  id: string
+  tenantId: string
+  createdAt: string
+  responsableId: string
+  archivoNombre: string
+  archivoHash: string
+  estado: 'en_progreso' | 'completada' | 'revertida' | 'fallida'
+  filasProcesadas: number
+  filasRechazadas: number
+  advertencias: number
+}
+
+export type ErrorCalidad = {
+  id: string
+  tenantId: string
+  importacionId: string
+  fila: number
+  severidad: 'critico' | 'advertencia'
+  tipo: string
+  mensaje: string
+}
+
+export type ClasificacionAnalitica =
+  | 'corto'
+  | 'mediano'
+  | 'prolongado'
+  | 'recurrente'
+  | 'continuacion'
+  | 'accidente'
+  | 'enfermedad_profesional'
+  | 'maternal'
+  | 'cuidado_familiar'
+  | 'sin_clasificar'
+  | 'calidad_insuficiente'
+
+export type Episodio = {
+  id: string
+  tenantId: string
+  personaId: string
+  createdAt: string
+  importacionId: string | null
+  tipoAdministrativoId: string
+  fechaInicio: string
+  fechaFin: string | null
+  dias: number
+  clasificacionAnalitica: ClasificacionAnalitica
+  estado: 'abierto' | 'cerrado'
+}
+
+export function mapImportacionRow(row: {
+  id: string
+  tenant_id: string
+  created_at: string
+  responsable_id: string
+  archivo_nombre: string
+  archivo_hash: string
+  estado: 'en_progreso' | 'completada' | 'revertida' | 'fallida'
+  filas_procesadas: number
+  filas_rechazadas: number
+  advertencias: number
+}): Importacion {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    createdAt: row.created_at,
+    responsableId: row.responsable_id,
+    archivoNombre: row.archivo_nombre,
+    archivoHash: row.archivo_hash,
+    estado: row.estado,
+    filasProcesadas: row.filas_procesadas,
+    filasRechazadas: row.filas_rechazadas,
+    advertencias: row.advertencias,
+  }
+}
+
+export function mapErrorCalidadRow(row: {
+  id: string
+  tenant_id: string
+  importacion_id: string
+  fila: number
+  severidad: 'critico' | 'advertencia'
+  tipo: string
+  mensaje: string
+}): ErrorCalidad {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    importacionId: row.importacion_id,
+    fila: row.fila,
+    severidad: row.severidad,
+    tipo: row.tipo,
+    mensaje: row.mensaje,
+  }
+}
+
+export function mapEpisodioRow(row: {
+  id: string
+  tenant_id: string
+  persona_id: string
+  created_at: string
+  importacion_id: string | null
+  tipo_administrativo_id: string
+  fecha_inicio: string
+  fecha_fin: string | null
+  dias: number
+  clasificacion_analitica: ClasificacionAnalitica
+  estado: 'abierto' | 'cerrado'
+}): Episodio {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    personaId: row.persona_id,
+    createdAt: row.created_at,
+    importacionId: row.importacion_id,
+    tipoAdministrativoId: row.tipo_administrativo_id,
+    fechaInicio: row.fecha_inicio,
+    fechaFin: row.fecha_fin,
+    dias: row.dias,
+    clasificacionAnalitica: row.clasificacion_analitica,
+    estado: row.estado,
+  }
+}

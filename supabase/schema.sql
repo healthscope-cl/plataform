@@ -355,3 +355,85 @@ create policy "contratos_write_admin" on contratos
 
 grant select, insert, update, delete on contratos to authenticated;
 grant all on contratos to service_role;
+
+-- ============================================================
+-- INGESTION: importaciones, errores de calidad, episodios
+-- ============================================================
+
+create table importaciones (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  responsable_id uuid not null references usuarios(id),
+  archivo_nombre text not null,
+  archivo_hash text not null,
+  estado text not null default 'en_progreso'
+    check (estado in ('en_progreso', 'completada', 'revertida', 'fallida')),
+  filas_procesadas integer not null default 0,
+  filas_rechazadas integer not null default 0,
+  advertencias integer not null default 0
+);
+
+alter table importaciones enable row level security;
+
+create policy "importaciones_select_same_tenant" on importaciones
+  for select to authenticated using (tenant_id = auth_tenant_id());
+
+create policy "importaciones_write_admin" on importaciones
+  for all to authenticated
+  using (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']))
+  with check (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']));
+
+grant select, insert, update on importaciones to authenticated;
+grant all on importaciones to service_role;
+
+create table errores_calidad (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  importacion_id uuid not null references importaciones(id) on delete cascade,
+  fila integer not null,
+  severidad text not null check (severidad in ('critico', 'advertencia')),
+  tipo text not null,
+  mensaje text not null
+);
+
+alter table errores_calidad enable row level security;
+
+create policy "errores_calidad_select_same_tenant" on errores_calidad
+  for select to authenticated using (tenant_id = auth_tenant_id());
+
+grant select on errores_calidad to authenticated;
+grant all on errores_calidad to service_role;
+
+create table episodios (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  persona_id uuid not null references personas(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  importacion_id uuid references importaciones(id),
+  tipo_administrativo_id uuid not null references tipos_administrativos(id),
+  fecha_inicio date not null,
+  fecha_fin date,
+  dias integer not null,
+  clasificacion_analitica text not null default 'sin_clasificar' check (
+    clasificacion_analitica in (
+      'corto', 'mediano', 'prolongado', 'recurrente', 'continuacion',
+      'accidente', 'enfermedad_profesional', 'maternal', 'cuidado_familiar',
+      'sin_clasificar', 'calidad_insuficiente'
+    )
+  ),
+  estado text not null default 'cerrado' check (estado in ('abierto', 'cerrado'))
+);
+
+alter table episodios enable row level security;
+
+create policy "episodios_select_same_tenant" on episodios
+  for select to authenticated using (tenant_id = auth_tenant_id());
+
+create policy "episodios_write_admin" on episodios
+  for all to authenticated
+  using (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']))
+  with check (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']));
+
+grant select, insert, update, delete on episodios to authenticated;
+grant all on episodios to service_role;
