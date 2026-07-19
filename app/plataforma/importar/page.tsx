@@ -8,7 +8,9 @@ import { FileDropzone } from '@/components/platform/import/FileDropzone'
 import { ColumnMappingStep } from '@/components/platform/import/ColumnMappingStep'
 import { QualityErrorsTable } from '@/components/platform/import/QualityErrorsTable'
 import { ImportPreviewTable } from '@/components/platform/import/ImportPreviewTable'
+import { ImportSummary } from '@/components/platform/import/ImportSummary'
 import { Button } from '@/components/ui/button'
+import { createClient } from '@/lib/supabase/client'
 
 type WizardStep = 'subir' | 'mapear' | 'validar' | 'confirmar' | 'resumen'
 
@@ -45,6 +47,9 @@ export default function ImportarPage() {
   const [file, setFile] = useState<File | null>(null)
   const [parsed, setParsed] = useState<ParsedSpreadsheet | null>(null)
   const [mapping, setMapping] = useState<Record<CanonicalField, string | null> | null>(null)
+  const [resumen, setResumen] = useState<{ filasProcesadas: number; filasRechazadas: number } | null>(null)
+  const [ejecutando, setEjecutando] = useState(false)
+  const [archivoRepetidoAviso, setArchivoRepetidoAviso] = useState<string | null>(null)
 
   const mappedRows = useMemo(() => (parsed && mapping ? toMappedRows(parsed, mapping) : []), [parsed, mapping])
   const validation = useMemo(() => validateRows({ rows: mappedRows, tiposValidos: TIPOS_VALIDOS }), [mappedRows])
@@ -63,6 +68,48 @@ export default function ImportarPage() {
     setParsed(result)
     setMapping(suggestColumnMapping(result.headers))
     setStep('mapear')
+  }
+
+  async function handleEjecutar(forzarReimportacion = false) {
+    if (!file) return
+    setEjecutando(true)
+    setArchivoRepetidoAviso(null)
+
+    const supabase = createClient()
+    const { data: empresas } = await supabase.from('empresas').select('id').limit(1)
+    const empresaId = empresas?.[0]?.id
+
+    const buffer = await file.arrayBuffer()
+    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer)
+    const archivoHash = Array.from(new Uint8Array(hashBuffer))
+      .map((byte) => byte.toString(16).padStart(2, '0'))
+      .join('')
+
+    const response = await fetch('/api/platform/importaciones/ejecutar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        archivoNombre: file.name,
+        archivoHash,
+        empresaId,
+        forzarReimportacion,
+        rows: mappedRows
+          .filter((_, index) => !excludedRows.has(index))
+          .map((row) => ({ ...row, codigoPersona: null })),
+      }),
+    })
+
+    if (response.status === 409) {
+      const data = await response.json()
+      setArchivoRepetidoAviso(data.mensaje)
+      setEjecutando(false)
+      return
+    }
+
+    const data = await response.json()
+    setResumen({ filasProcesadas: data.filasProcesadas, filasRechazadas: data.filasRechazadas })
+    setEjecutando(false)
+    setStep('resumen')
   }
 
   return (
@@ -103,10 +150,28 @@ export default function ImportarPage() {
       ) : null}
 
       {step === 'confirmar' ? (
-        <p className="text-sm text-muted-foreground">
-          Confirmación y ejecución — continúa en la Tarea 10 ({file?.name}, {mappedRows.length - excludedRows.size}{' '}
-          filas a importar).
-        </p>
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Se importarán {mappedRows.length - excludedRows.size} de {mappedRows.length} filas de &quot;{file?.name}&quot;.
+            Las filas con errores críticos serán excluidas.
+          </p>
+          {archivoRepetidoAviso ? (
+            <div className="space-y-2 rounded-xl border border-destructive/30 bg-destructive/5 p-4">
+              <p className="text-sm text-destructive">{archivoRepetidoAviso}</p>
+              <Button type="button" variant="outline" disabled={ejecutando} onClick={() => handleEjecutar(true)}>
+                Reimportar de todas formas
+              </Button>
+            </div>
+          ) : (
+            <Button type="button" disabled={ejecutando} onClick={() => handleEjecutar(false)}>
+              {ejecutando ? 'Importando…' : 'Ejecutar importación'}
+            </Button>
+          )}
+        </div>
+      ) : null}
+
+      {step === 'resumen' && resumen ? (
+        <ImportSummary filasProcesadas={resumen.filasProcesadas} filasRechazadas={resumen.filasRechazadas} />
       ) : null}
     </div>
   )
