@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 
 const FIELD_LABELS: Record<CanonicalField, string> = {
   rut: 'RUT (obligatorio)',
@@ -39,12 +40,14 @@ export function ColumnMappingStep({
       <div className="grid gap-4 sm:grid-cols-2">
         {CANONICAL_FIELDS.map((field) => (
           <div key={field} className="space-y-1.5">
-            <label className="text-sm text-muted-foreground">{FIELD_LABELS[field]}</label>
+            <Label htmlFor={field} className="text-sm text-muted-foreground">
+              {FIELD_LABELS[field]}
+            </Label>
             <Select
               value={mapping[field] ?? '__none__'}
               onValueChange={(value) => onChange(field, value === '__none__' ? null : value)}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger id={field} className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -60,7 +63,7 @@ export function ColumnMappingStep({
         ))}
       </div>
       {missingRequired.length > 0 ? (
-        <p className="text-sm text-destructive">
+        <p className="text-sm text-destructive" role="alert">
           Faltan campos obligatorios: {missingRequired.map((field) => FIELD_LABELS[field]).join(', ')}.
         </p>
       ) : null}
