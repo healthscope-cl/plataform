@@ -18,14 +18,14 @@ export async function POST(request: Request) {
 
   const { data: caller } = await supabase
     .from('usuarios')
-    .select('tenant_id, roles(clave)')
+    .select('tenant_id, estado, roles(clave)')
     .eq('id', user.id)
     .single()
   if (!caller) {
     return NextResponse.json({ error: 'Usuario no encontrado.' }, { status: 403 })
   }
   const rolClave = (caller.roles as unknown as { clave: string }).clave
-  if (!isAdminRole(rolClave)) {
+  if (!isAdminRole(rolClave) || caller.estado !== 'activo') {
     return NextResponse.json({ error: 'No autorizado.' }, { status: 403 })
   }
   const tenantId = caller.tenant_id as string
@@ -39,6 +39,17 @@ export async function POST(request: Request) {
   }
 
   const admin = createAdminClient()
+
+  const { data: empresaValida } = await admin
+    .from('empresas')
+    .select('id')
+    .eq('id', body.empresaId)
+    .eq('tenant_id', tenantId)
+    .maybeSingle()
+
+  if (!empresaValida) {
+    return NextResponse.json({ error: 'Empresa no encontrada para este tenant.' }, { status: 400 })
+  }
 
   const { data: archivoRepetido } = await admin
     .from('importaciones')
