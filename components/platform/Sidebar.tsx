@@ -4,6 +4,8 @@ import { isAdminRole } from '@/lib/platform/roles'
 const NAV_ITEMS = [
   { href: '/plataforma/resumen', label: 'Resumen', adminOnly: false },
   { href: '/plataforma/organizacion', label: 'Organización', adminOnly: true },
+  { href: '/plataforma/importar', label: 'Importar datos', adminOnly: true },
+  { href: '/plataforma/importar/historial', label: 'Historial de importaciones', adminOnly: true },
   { href: '/plataforma/usuarios', label: 'Usuarios y permisos', adminOnly: true },
   { href: '/plataforma/auditoria', label: 'Auditoría', adminOnly: true },
 ] as const
