@@ -40,6 +40,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Importación no encontrada.' }, { status: 404 })
   }
 
+  if (importacion.estado !== 'completada') {
+    const mensaje =
+      importacion.estado === 'revertida'
+        ? 'Esta importación ya fue revertida.'
+        : importacion.estado === 'en_progreso'
+          ? 'No se puede revertir una importación que aún está en progreso.'
+          : 'Solo se pueden revertir importaciones completadas.'
+    return NextResponse.json({ error: mensaje }, { status: 400 })
+  }
+
   const { data: episodiosDeLaImportacion } = await admin
     .from('episodios')
     .select('id, persona_id')
@@ -47,7 +57,16 @@ export async function POST(request: Request) {
 
   const personaIds = Array.from(new Set((episodiosDeLaImportacion ?? []).map((e) => e.persona_id as string)))
 
-  await admin.from('episodios').delete().eq('importacion_id', importacionId)
+  const { error: episodiosDeleteError } = await admin.from('episodios').delete().eq('importacion_id', importacionId)
+
+  if (episodiosDeleteError) {
+    return NextResponse.json(
+      { error: `No se pudieron eliminar los episodios: ${episodiosDeleteError.message}` },
+      { status: 500 }
+    )
+  }
+
+  const personaDeleteErrors: string[] = []
 
   for (const personaId of personaIds) {
     const { count } = await admin
@@ -55,11 +74,32 @@ export async function POST(request: Request) {
       .select('id', { count: 'exact', head: true })
       .eq('persona_id', personaId)
     if ((count ?? 0) === 0) {
-      await admin.from('personas').delete().eq('id', personaId)
+      const { error: personaDeleteError } = await admin.from('personas').delete().eq('id', personaId)
+      if (personaDeleteError) {
+        personaDeleteErrors.push(`${personaId}: ${personaDeleteError.message}`)
+      }
     }
   }
 
-  await admin.from('importaciones').update({ estado: 'revertida' }).eq('id', importacionId)
+  const { error: importacionUpdateError } = await admin
+    .from('importaciones')
+    .update({ estado: 'revertida' })
+    .eq('id', importacionId)
+
+  if (importacionUpdateError) {
+    return NextResponse.json(
+      { error: `Los episodios fueron eliminados pero no se pudo actualizar el estado de la importación: ${importacionUpdateError.message}` },
+      { status: 500 }
+    )
+  }
+
+  if (personaDeleteErrors.length > 0) {
+    return NextResponse.json({
+      ok: true,
+      advertencia: 'Algunas personas no pudieron eliminarse.',
+      personasNoEliminadas: personaDeleteErrors,
+    })
+  }
 
   return NextResponse.json({ ok: true })
 }
