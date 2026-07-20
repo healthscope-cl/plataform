@@ -7,6 +7,9 @@ import type { IndicadorValor } from '@/lib/indicators/formulas'
 import { ResumenInteractivo } from '@/components/platform/dashboard/ResumenInteractivo'
 import { calcularIndiceSuficiencia } from '@/lib/suficiencia/calcular'
 import { SuficienciaBanner } from '@/components/platform/dashboard/SuficienciaBanner'
+import { mapReglaAlertaRow } from '@/lib/alertas/types'
+import { evaluarReglas } from '@/lib/alertas/evaluar'
+import { AlertasBanner } from '@/components/platform/dashboard/AlertasBanner'
 
 const COSTOS_DEFAULT = {
   costoPromedioDiario: 40000,
@@ -128,6 +131,20 @@ export default async function ResumenPage() {
     sucursalId: row.sucursal_id as string,
   }))
 
+  const { data: reglaRows } = await supabase
+    .from('reglas_alerta')
+    .select('*')
+    .eq('empresa_id', empresaId)
+  const reglas = (reglaRows ?? []).map(mapReglaAlertaRow)
+
+  const alertasDisparadas = evaluarReglas({
+    reglas,
+    personas,
+    unidades,
+    episodios,
+    costos: COSTOS_DEFAULT,
+  })
+
   const { data: cargoRows } = await supabase.from('cargos').select('id, nombre').eq('empresa_id', empresaId)
   const cargos = (cargoRows ?? []).map((row) => ({ id: row.id as string, nombre: row.nombre as string }))
 
@@ -147,6 +164,7 @@ export default async function ResumenPage() {
   return (
     <div className="space-y-6">
       <SuficienciaBanner indice={indiceSuficiencia} />
+      <AlertasBanner alertas={alertasDisparadas} />
       <div>
         <h1 className="font-heading text-2xl font-semibold text-foreground">Resumen</h1>
         <p className="mt-1 text-sm text-muted-foreground">
