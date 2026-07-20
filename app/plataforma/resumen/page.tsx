@@ -6,6 +6,8 @@ import { computeIndicadores, type IndicadorResultados } from '@/lib/indicators/a
 import { cambio, type IndicadorValor } from '@/lib/indicators/formulas'
 import { IndicadorCard } from '@/components/platform/dashboard/IndicadorCard'
 import { GuardarLineaBaseButton } from '@/components/platform/dashboard/GuardarLineaBaseButton'
+import { computeIndicadoresPorPersona } from '@/lib/indicators/porPersona'
+import { PersonaDetalleTable } from '@/components/platform/dashboard/PersonaDetalleTable'
 
 const COSTOS_DEFAULT = {
   costoPromedioDiario: 40000,
@@ -67,11 +69,15 @@ export default async function ResumenPage() {
   periodoInicioDate.setMonth(periodoInicioDate.getMonth() - 6)
   const periodoInicio = periodoInicioDate.toISOString().slice(0, 10)
 
-  const { data: personaRows } = await supabase.from('personas').select('id').eq('empresa_id', empresaId)
+  const { data: personaRows } = await supabase.from('personas').select('id, codigo').eq('empresa_id', empresaId)
   // Placeholder: assumes every active persona was contracted for the full 6-month period
   // (flat 180 days), instead of reading each person's real `contratos` row. Follow-up task
   // should join `contratos` to compute real active-days-in-period per persona.
-  const personas = (personaRows ?? []).map((row) => ({ id: row.id as string, contratoDias: 180 }))
+  const personas = (personaRows ?? []).map((row) => ({
+    id: row.id as string,
+    codigo: row.codigo as string,
+    contratoDias: 180,
+  }))
 
   const personaIds = personas.map((p) => p.id)
   const { data: episodioRows } =
@@ -89,6 +95,12 @@ export default async function ResumenPage() {
   }))
 
   const resultados = computeIndicadores({ personas, episodios, costos: COSTOS_DEFAULT })
+
+  const personasIndicador = computeIndicadoresPorPersona({
+    personas,
+    episodios,
+    costoPromedioDiario: COSTOS_DEFAULT.costoPromedioDiario,
+  })
 
   const { data: lineaBaseRows } = await supabase
     .from('lineas_base')
@@ -197,6 +209,8 @@ export default async function ResumenPage() {
           cambio={cambioDe('costoEstimado')}
         />
       </div>
+
+      <PersonaDetalleTable rolClave={rol.clave} personas={personasIndicador} />
 
       <p className="text-xs text-muted-foreground">
         Rol: {rol.nombre}. Los costos usan supuestos por defecto (costo promedio diario
