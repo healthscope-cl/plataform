@@ -31,3 +31,26 @@ describe('suggestColumnMapping', () => {
     expect(result.rut).toBeNull()
   })
 })
+
+describe('grupo organizacional (sucursal, unidad, cargo, turno)', () => {
+  it('matches new organizational headers exactly', () => {
+    const result = suggestColumnMapping(['Sucursal', 'Unidad', 'Cargo', 'Turno'])
+    expect(result.sucursal).toBe('Sucursal')
+    expect(result.unidad).toBe('Unidad')
+    expect(result.cargo).toBe('Cargo')
+    expect(result.turno).toBe('Turno')
+  })
+
+  it('matches "Área" as an alias for unidad', () => {
+    const result = suggestColumnMapping(['Área'])
+    expect(result.unidad).toBe('Área')
+  })
+
+  it('does not map "Centro de Costo" to any of the 4 new fields (out of scope this phase)', () => {
+    const result = suggestColumnMapping(['Centro de Costo'])
+    expect(result.sucursal).toBeNull()
+    expect(result.unidad).toBeNull()
+    expect(result.cargo).toBeNull()
+    expect(result.turno).toBeNull()
+  })
+})

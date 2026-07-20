@@ -1,4 +1,15 @@
-export const CANONICAL_FIELDS = ['rut', 'fechaInicio', 'fechaFin', 'dias', 'tipoAdministrativo', 'codigoPersona'] as const
+export const CANONICAL_FIELDS = [
+  'rut',
+  'fechaInicio',
+  'fechaFin',
+  'dias',
+  'tipoAdministrativo',
+  'codigoPersona',
+  'sucursal',
+  'unidad',
+  'cargo',
+  'turno',
+] as const
 export type CanonicalField = (typeof CANONICAL_FIELDS)[number]
 
 // Plain string-similarity aliases, no model — see Global Constraints. Listed in priority
@@ -10,9 +21,13 @@ const ALIASES: Record<CanonicalField, string[]> = {
   dias: ['dias', 'días', 'dias ausencia', 'días de ausencia'],
   tipoAdministrativo: ['tipo', 'tipo licencia', 'tipo de licencia', 'tipo administrativo'],
   codigoPersona: ['codigo', 'código', 'codigo persona', 'código persona', 'legajo'],
+  sucursal: ['sucursal', 'sede', 'planta'],
+  unidad: ['unidad', 'area', 'área', 'departamento'],
+  cargo: ['cargo', 'puesto', 'posicion', 'posición'],
+  turno: ['turno'],
 }
 
-function normalize(value: string): string {
+export function normalize(value: string): string {
   return value
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
