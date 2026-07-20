@@ -32,13 +32,14 @@ const TIPOS_VALIDOS = [
 function toMappedRows(
   parsed: ParsedSpreadsheet,
   mapping: Record<CanonicalField, string | null>
-): MappedRow[] {
+): Array<MappedRow & { codigoPersona: string | null }> {
   return parsed.rows.map((row) => ({
     rut: mapping.rut ? String(row[mapping.rut] ?? '') || null : null,
     fechaInicio: mapping.fechaInicio ? String(row[mapping.fechaInicio] ?? '') || null : null,
     fechaFin: mapping.fechaFin ? String(row[mapping.fechaFin] ?? '') || null : null,
     dias: mapping.dias ? Number(row[mapping.dias]) : null,
     tipoAdministrativo: mapping.tipoAdministrativo ? String(row[mapping.tipoAdministrativo] ?? '') || null : null,
+    codigoPersona: mapping.codigoPersona ? String(row[mapping.codigoPersona] ?? '') || null : null,
   }))
 }
 
@@ -93,9 +94,7 @@ export default function ImportarPage() {
         archivoHash,
         empresaId,
         forzarReimportacion,
-        rows: mappedRows
-          .filter((_, index) => !excludedRows.has(index))
-          .map((row) => ({ ...row, codigoPersona: null })),
+        rows: mappedRows.filter((_, index) => !excludedRows.has(index)),
       }),
     })
 

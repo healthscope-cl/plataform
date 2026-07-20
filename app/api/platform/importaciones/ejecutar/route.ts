@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { isAdminRole } from '@/lib/platform/roles'
 import { clasificarEpisodio } from '@/lib/ingestion/classification'
 import { hashRut } from '@/lib/ingestion/rutHash'
-import type { MappedRow } from '@/lib/ingestion/validate'
+import { validateRows, type MappedRow } from '@/lib/ingestion/validate'
 import type { TipoAdministrativoClave } from '@/lib/ingestion/types'
 
 export async function POST(request: Request) {
@@ -86,11 +86,40 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: importacionError?.message ?? 'No se pudo crear la importación.' }, { status: 500 })
   }
 
+  const { data: tiposAdministrativos } = await admin.from('tipos_administrativos').select('id, clave')
+  const tiposValidos = (tiposAdministrativos ?? []).map((tipo) => tipo.clave as string)
+  const tipoIdPorClave = new Map<string, string>(
+    (tiposAdministrativos ?? []).map((tipo) => [tipo.clave as string, tipo.id as string])
+  )
+
+  const validation = validateRows({ rows: body.rows, tiposValidos })
+
+  const erroresCalidadRows = Array.from(validation.filaErrors.entries()).flatMap(([fila, errors]) =>
+    errors.map((error) => ({
+      tenant_id: tenantId,
+      importacion_id: importacion.id,
+      fila,
+      severidad: error.severidad,
+      tipo: error.tipo,
+      mensaje: error.mensaje,
+    }))
+  )
+
+  if (erroresCalidadRows.length > 0) {
+    await admin.from('errores_calidad').insert(erroresCalidadRows)
+  }
+
   let filasProcesadas = 0
   let filasRechazadas = 0
   const episodiosPreviosPorRut = new Map<string, number>()
 
-  for (const row of body.rows) {
+  for (const [index, row] of body.rows.entries()) {
+    const tieneCritico = validation.filaErrors.get(index)?.some((error) => error.severidad === 'critico') ?? false
+    if (tieneCritico) {
+      filasRechazadas += 1
+      continue
+    }
+
     if (!row.rut || !row.fechaInicio || !row.dias || !row.tipoAdministrativo) {
       filasRechazadas += 1
       continue
@@ -124,12 +153,8 @@ export async function POST(request: Request) {
       personaId = newPersona.id as string
     }
 
-    const { data: tipo } = await admin
-      .from('tipos_administrativos')
-      .select('id')
-      .eq('clave', row.tipoAdministrativo)
-      .single()
-    if (!tipo) {
+    const tipoId = tipoIdPorClave.get(row.tipoAdministrativo)
+    if (!tipoId) {
       filasRechazadas += 1
       continue
     }
@@ -146,7 +171,7 @@ export async function POST(request: Request) {
       tenant_id: tenantId,
       persona_id: personaId,
       importacion_id: importacion.id,
-      tipo_administrativo_id: tipo.id,
+      tipo_administrativo_id: tipoId,
       fecha_inicio: row.fechaInicio,
       fecha_fin: row.fechaFin ?? null,
       dias: row.dias,
@@ -163,7 +188,12 @@ export async function POST(request: Request) {
 
   await admin
     .from('importaciones')
-    .update({ estado: 'completada', filas_procesadas: filasProcesadas, filas_rechazadas: filasRechazadas })
+    .update({
+      estado: 'completada',
+      filas_procesadas: filasProcesadas,
+      filas_rechazadas: filasRechazadas,
+      advertencias: validation.resumen.advertencias,
+    })
     .eq('id', importacion.id)
 
   return NextResponse.json({ importacionId: importacion.id, filasProcesadas, filasRechazadas })
