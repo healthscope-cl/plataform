@@ -437,3 +437,30 @@ create policy "episodios_write_admin" on episodios
 
 grant select, insert, update, delete on episodios to authenticated;
 grant all on episodios to service_role;
+
+-- ============================================================
+-- INDICATORS: lineas_base
+-- ============================================================
+
+create table lineas_base (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  empresa_id uuid not null references empresas(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  creada_por uuid not null references usuarios(id),
+  periodo_inicio date not null,
+  periodo_fin date not null,
+  indicadores jsonb not null
+);
+
+alter table lineas_base enable row level security;
+
+create policy "lineas_base_select_same_tenant" on lineas_base
+  for select to authenticated using (tenant_id = auth_tenant_id());
+
+create policy "lineas_base_insert_admin" on lineas_base
+  for insert to authenticated
+  with check (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']));
+
+grant select, insert on lineas_base to authenticated;
+grant all on lineas_base to service_role;
