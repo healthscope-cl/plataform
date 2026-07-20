@@ -28,7 +28,7 @@ export function IndicadorCard({
       ) : (
         <>
           <Tooltip>
-            <TooltipTrigger className="text-left">
+            <TooltipTrigger render={<div className="text-left" />}>
               <p className="mt-1 font-heading text-2xl font-semibold text-foreground [font-variant-numeric:tabular-nums]">
                 {formatValor(resultado.valor, sufijo)}
               </p>

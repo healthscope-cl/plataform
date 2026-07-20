@@ -14,6 +14,20 @@ const COSTOS_DEFAULT = {
   costosAdministrativos: 0,
 }
 
+const INDICADOR_KEYS: readonly (keyof IndicadorResultados)[] = [
+  'tasaAusentismo',
+  'frecuencia',
+  'severidad',
+  'duracionPromedio',
+  'reincidencia',
+  'costoEstimado',
+]
+
+function esIndicadorResultados(valor: unknown): valor is IndicadorResultados {
+  if (typeof valor !== 'object' || valor === null) return false
+  return INDICADOR_KEYS.every((clave) => clave in valor)
+}
+
 export default async function ResumenPage() {
   const supabase = await createClient()
   const {
@@ -38,6 +52,9 @@ export default async function ResumenPage() {
   const periodoInicio = periodoInicioDate.toISOString().slice(0, 10)
 
   const { data: personaRows } = await supabase.from('personas').select('id').eq('empresa_id', empresaId)
+  // Placeholder: assumes every active persona was contracted for the full 6-month period
+  // (flat 180 days), instead of reading each person's real `contratos` row. Follow-up task
+  // should join `contratos` to compute real active-days-in-period per persona.
   const personas = (personaRows ?? []).map((row) => ({ id: row.id as string, contratoDias: 180 }))
 
   const personaIds = personas.map((p) => p.id)
@@ -64,7 +81,12 @@ export default async function ResumenPage() {
     .order('created_at', { ascending: false })
     .limit(1)
   const ultimaLineaBase = lineaBaseRows?.[0] ? mapLineaBaseRow(lineaBaseRows[0]) : null
-  const indicadoresBase = ultimaLineaBase?.indicadores as IndicadorResultados | undefined
+  // Defensive: a saved baseline's `indicadores` blob may predate a future indicator-key
+  // change. Verify the expected keys are present before trusting the shape — if they
+  // aren't, treat it as if there were no baseline (no comparison shown) instead of letting
+  // `cambioDe()` throw on a missing key and crash the whole Server Component render.
+  const indicadoresBaseCrudo = ultimaLineaBase?.indicadores
+  const indicadoresBase = esIndicadorResultados(indicadoresBaseCrudo) ? indicadoresBaseCrudo : undefined
 
   function valorNumerico(resultado: IndicadorValor): number | null {
     return 'suprimido' in resultado ? null : resultado.valor
@@ -91,6 +113,7 @@ export default async function ResumenPage() {
           tenantId={usuario.tenantId}
           empresaId={empresaId}
           actorId={usuario.id}
+          rolClave={rol.clave}
           periodoInicio={periodoInicio}
           periodoFin={periodoFin}
           indicadores={resultados}
