@@ -2,12 +2,9 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { mapUsuarioRow, mapRolRow } from '@/lib/platform/types'
 import { mapLineaBaseRow } from '@/lib/indicators/types'
-import { computeIndicadores, type IndicadorResultados } from '@/lib/indicators/aggregate'
-import { cambio, type IndicadorValor } from '@/lib/indicators/formulas'
-import { IndicadorCard } from '@/components/platform/dashboard/IndicadorCard'
-import { GuardarLineaBaseButton } from '@/components/platform/dashboard/GuardarLineaBaseButton'
-import { computeIndicadoresPorPersona } from '@/lib/indicators/porPersona'
-import { PersonaDetalleTable } from '@/components/platform/dashboard/PersonaDetalleTable'
+import type { IndicadorResultados } from '@/lib/indicators/aggregate'
+import type { IndicadorValor } from '@/lib/indicators/formulas'
+import { ResumenInteractivo } from '@/components/platform/dashboard/ResumenInteractivo'
 
 const COSTOS_DEFAULT = {
   costoPromedioDiario: 40000,
@@ -26,9 +23,9 @@ const INDICADOR_KEYS: readonly (keyof IndicadorResultados)[] = [
 ]
 
 // A well-formed IndicadorValor is either `{ suprimido: true }` or an object with numeric
-// valor/numerador/denominador fields — see lib/indicators/formulas.ts. Checking only for
-// key presence (as the previous guard did) lets a malformed value under a present key
-// through, which then throws inside valorNumerico()'s `'suprimido' in resultado` check.
+// valor/numerador/denominador fields — see lib/indicators/formulas.ts. Checking only for key
+// presence lets a malformed value under a present key through, which would then throw inside
+// ResumenInteractivo's `'suprimido' in resultado` check.
 function esIndicadorValor(valor: unknown): valor is IndicadorValor {
   if (typeof valor !== 'object' || valor === null) return false
   const registro = valor as Record<string, unknown>
@@ -69,7 +66,10 @@ export default async function ResumenPage() {
   periodoInicioDate.setMonth(periodoInicioDate.getMonth() - 6)
   const periodoInicio = periodoInicioDate.toISOString().slice(0, 10)
 
-  const { data: personaRows } = await supabase.from('personas').select('id, codigo').eq('empresa_id', empresaId)
+  const { data: personaRows } = await supabase
+    .from('personas')
+    .select('id, codigo, unidad_id, cargo_id, turno_id')
+    .eq('empresa_id', empresaId)
   // Placeholder: assumes every active persona was contracted for the full 6-month period
   // (flat 180 days), instead of reading each person's real `contratos` row. Follow-up task
   // should join `contratos` to compute real active-days-in-period per persona.
@@ -77,6 +77,9 @@ export default async function ResumenPage() {
     id: row.id as string,
     codigo: row.codigo as string,
     contratoDias: 180,
+    unidadId: row.unidad_id as string | null,
+    cargoId: row.cargo_id as string | null,
+    turnoId: row.turno_id as string | null,
   }))
 
   const personaIds = personas.map((p) => p.id)
@@ -94,13 +97,25 @@ export default async function ResumenPage() {
     estado: row.estado as 'abierto' | 'cerrado',
   }))
 
-  const resultados = computeIndicadores({ personas, episodios, costos: COSTOS_DEFAULT })
+  const { data: sucursalRows } = await supabase.from('sucursales').select('id, nombre').eq('empresa_id', empresaId)
+  const sucursales = (sucursalRows ?? []).map((row) => ({ id: row.id as string, nombre: row.nombre as string }))
+  const sucursalIds = sucursales.map((s) => s.id)
 
-  const personasIndicador = computeIndicadoresPorPersona({
-    personas,
-    episodios,
-    costoPromedioDiario: COSTOS_DEFAULT.costoPromedioDiario,
-  })
+  const { data: unidadRows } =
+    sucursalIds.length > 0
+      ? await supabase.from('unidades').select('id, nombre, sucursal_id').in('sucursal_id', sucursalIds)
+      : { data: [] }
+  const unidades = (unidadRows ?? []).map((row) => ({
+    id: row.id as string,
+    nombre: row.nombre as string,
+    sucursalId: row.sucursal_id as string,
+  }))
+
+  const { data: cargoRows } = await supabase.from('cargos').select('id, nombre').eq('empresa_id', empresaId)
+  const cargos = (cargoRows ?? []).map((row) => ({ id: row.id as string, nombre: row.nombre as string }))
+
+  const { data: turnoRows } = await supabase.from('turnos').select('id, nombre').eq('empresa_id', empresaId)
+  const turnos = (turnoRows ?? []).map((row) => ({ id: row.id as string, nombre: row.nombre as string }))
 
   const { data: lineaBaseRows } = await supabase
     .from('lineas_base')
@@ -109,43 +124,16 @@ export default async function ResumenPage() {
     .order('created_at', { ascending: false })
     .limit(1)
   const ultimaLineaBase = lineaBaseRows?.[0] ? mapLineaBaseRow(lineaBaseRows[0]) : null
-  // Defensive: a saved baseline's `indicadores` blob may predate a future indicator-key
-  // change. Verify the expected keys are present before trusting the shape — if they
-  // aren't, treat it as if there were no baseline (no comparison shown) instead of letting
-  // `cambioDe()` throw on a missing key and crash the whole Server Component render.
   const indicadoresBaseCrudo = ultimaLineaBase?.indicadores
   const indicadoresBase = esIndicadorResultados(indicadoresBaseCrudo) ? indicadoresBaseCrudo : undefined
 
-  function valorNumerico(resultado: IndicadorValor): number | null {
-    return 'suprimido' in resultado ? null : resultado.valor
-  }
-
-  function cambioDe(clave: keyof IndicadorResultados) {
-    if (!indicadoresBase) return null
-    return cambio({
-      valorActual: valorNumerico(resultados[clave]),
-      valorLineaBase: valorNumerico(indicadoresBase[clave]),
-    })
-  }
-
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-heading text-2xl font-semibold text-foreground">Resumen</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Período: {periodoInicio} a {periodoFin} · {personas.length} personas activas
-          </p>
-        </div>
-        <GuardarLineaBaseButton
-          tenantId={usuario.tenantId}
-          empresaId={empresaId}
-          actorId={usuario.id}
-          rolClave={rol.clave}
-          periodoInicio={periodoInicio}
-          periodoFin={periodoFin}
-          indicadores={resultados}
-        />
+      <div>
+        <h1 className="font-heading text-2xl font-semibold text-foreground">Resumen</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Período: {periodoInicio} a {periodoFin}
+        </p>
       </div>
 
       {ultimaLineaBase ? (
@@ -159,58 +147,22 @@ export default async function ResumenPage() {
         </p>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <IndicadorCard
-          titulo="Tasa de ausentismo"
-          resultado={resultados.tasaAusentismo}
-          sufijo="%"
-          etiquetaNumerador="Días perdidos"
-          etiquetaDenominador="Días programados"
-          cambio={cambioDe('tasaAusentismo')}
-        />
-        <IndicadorCard
-          titulo="Frecuencia"
-          resultado={resultados.frecuencia}
-          sufijo="%"
-          etiquetaNumerador="Episodios"
-          etiquetaDenominador="Dotación promedio"
-          cambio={cambioDe('frecuencia')}
-        />
-        <IndicadorCard
-          titulo="Severidad"
-          resultado={resultados.severidad}
-          sufijo=" días/episodio"
-          etiquetaNumerador="Días perdidos"
-          etiquetaDenominador="Episodios"
-          cambio={cambioDe('severidad')}
-        />
-        <IndicadorCard
-          titulo="Duración promedio"
-          resultado={resultados.duracionPromedio}
-          sufijo=" días"
-          etiquetaNumerador="Días perdidos"
-          etiquetaDenominador="Episodios cerrados"
-          cambio={cambioDe('duracionPromedio')}
-        />
-        <IndicadorCard
-          titulo="Reincidencia"
-          resultado={resultados.reincidencia}
-          sufijo="%"
-          etiquetaNumerador="Personas con 2+ episodios"
-          etiquetaDenominador="Personas con 1+ episodio"
-          cambio={cambioDe('reincidencia')}
-        />
-        <IndicadorCard
-          titulo="Costo estimado"
-          resultado={resultados.costoEstimado}
-          sufijo="$"
-          etiquetaNumerador="Costo total"
-          etiquetaDenominador="—"
-          cambio={cambioDe('costoEstimado')}
-        />
-      </div>
-
-      <PersonaDetalleTable rolClave={rol.clave} personas={personasIndicador} />
+      <ResumenInteractivo
+        personas={personas}
+        episodios={episodios}
+        sucursales={sucursales}
+        unidades={unidades}
+        cargos={cargos}
+        turnos={turnos}
+        costos={COSTOS_DEFAULT}
+        indicadoresBase={indicadoresBase}
+        periodoInicio={periodoInicio}
+        periodoFin={periodoFin}
+        tenantId={usuario.tenantId}
+        empresaId={empresaId}
+        actorId={usuario.id}
+        rolClave={rol.clave}
+      />
 
       <p className="text-xs text-muted-foreground">
         Rol: {rol.nombre}. Los costos usan supuestos por defecto (costo promedio diario
