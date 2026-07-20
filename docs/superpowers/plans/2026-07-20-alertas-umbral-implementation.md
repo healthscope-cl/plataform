@@ -342,9 +342,16 @@ Expected: FAIL with "Cannot find module './evaluar'"
 
 - [ ] **Step 3: Write `lib/alertas/evaluar.ts`**
 
+Use relative imports for the sibling `lib/indicators/` modules, not the `@/` alias — every
+existing cross-file import within `lib/` in this project uses relative paths (e.g.
+`lib/ingestion/groupMatching.ts` imports from `./columnMapping`); only `app/`/`components/`
+files use `@/`. (Corrected during execution — commit `2be86c9`: the first draft of this task
+used `@/lib/indicators/...` and needed a new `vitest.config.ts` alias to resolve it, which was
+unnecessary scope once the import matched the established convention.)
+
 ```typescript
-import { filtrarPersonas, type FiltroGrupo } from '@/lib/indicators/filtroPersonas'
-import { computeIndicadores, type IndicadorResultados } from '@/lib/indicators/aggregate'
+import { filtrarPersonas, type FiltroGrupo } from '../indicators/filtroPersonas'
+import { computeIndicadores, type IndicadorResultados } from '../indicators/aggregate'
 import type { ReglaAlerta } from './types'
 
 export type AlertaDisparada = {
