@@ -5,6 +5,8 @@ import { mapLineaBaseRow } from '@/lib/indicators/types'
 import type { IndicadorResultados } from '@/lib/indicators/aggregate'
 import type { IndicadorValor } from '@/lib/indicators/formulas'
 import { ResumenInteractivo } from '@/components/platform/dashboard/ResumenInteractivo'
+import { calcularIndiceSuficiencia } from '@/lib/suficiencia/calcular'
+import { SuficienciaBanner } from '@/components/platform/dashboard/SuficienciaBanner'
 
 const COSTOS_DEFAULT = {
   costoPromedioDiario: 40000,
@@ -97,6 +99,21 @@ export default async function ResumenPage() {
     estado: row.estado as 'abierto' | 'cerrado',
   }))
 
+  const { data: importacionReciente } = await supabase
+    .from('importaciones')
+    .select('id')
+    .eq('tenant_id', usuario.tenantId)
+    .eq('estado', 'completada')
+    .gte('created_at', periodoInicio)
+    .limit(1)
+  const huboImportacionReciente = (importacionReciente ?? []).length > 0
+
+  const indiceSuficiencia = calcularIndiceSuficiencia({
+    personas,
+    cantidadEpisodios: episodios.length,
+    huboImportacionReciente,
+  })
+
   const { data: sucursalRows } = await supabase.from('sucursales').select('id, nombre').eq('empresa_id', empresaId)
   const sucursales = (sucursalRows ?? []).map((row) => ({ id: row.id as string, nombre: row.nombre as string }))
   const sucursalIds = sucursales.map((s) => s.id)
@@ -129,6 +146,7 @@ export default async function ResumenPage() {
 
   return (
     <div className="space-y-6">
+      <SuficienciaBanner indice={indiceSuficiencia} />
       <div>
         <h1 className="font-heading text-2xl font-semibold text-foreground">Resumen</h1>
         <p className="mt-1 text-sm text-muted-foreground">
