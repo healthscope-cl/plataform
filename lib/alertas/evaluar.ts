@@ -1,5 +1,5 @@
-import { filtrarPersonas, type FiltroGrupo } from '@/lib/indicators/filtroPersonas'
-import { computeIndicadores, type IndicadorResultados } from '@/lib/indicators/aggregate'
+import { filtrarPersonas, type FiltroGrupo } from '../indicators/filtroPersonas'
+import { computeIndicadores, type IndicadorResultados } from '../indicators/aggregate'
 import type { ReglaAlerta } from './types'
 
 export type AlertaDisparada = {
