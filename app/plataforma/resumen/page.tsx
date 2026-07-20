@@ -23,9 +23,25 @@ const INDICADOR_KEYS: readonly (keyof IndicadorResultados)[] = [
   'costoEstimado',
 ]
 
+// A well-formed IndicadorValor is either `{ suprimido: true }` or an object with numeric
+// valor/numerador/denominador fields — see lib/indicators/formulas.ts. Checking only for
+// key presence (as the previous guard did) lets a malformed value under a present key
+// through, which then throws inside valorNumerico()'s `'suprimido' in resultado` check.
+function esIndicadorValor(valor: unknown): valor is IndicadorValor {
+  if (typeof valor !== 'object' || valor === null) return false
+  const registro = valor as Record<string, unknown>
+  if ('suprimido' in registro) return registro.suprimido === true
+  return (
+    typeof registro.valor === 'number' &&
+    typeof registro.numerador === 'number' &&
+    typeof registro.denominador === 'number'
+  )
+}
+
 function esIndicadorResultados(valor: unknown): valor is IndicadorResultados {
   if (typeof valor !== 'object' || valor === null) return false
-  return INDICADOR_KEYS.every((clave) => clave in valor)
+  const registro = valor as Record<string, unknown>
+  return INDICADOR_KEYS.every((clave) => clave in registro && esIndicadorValor(registro[clave]))
 }
 
 export default async function ResumenPage() {
