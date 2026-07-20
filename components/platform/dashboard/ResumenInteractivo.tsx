@@ -10,6 +10,7 @@ import { PersonaDetalleTable } from '@/components/platform/dashboard/PersonaDeta
 import { GuardarLineaBaseButton } from '@/components/platform/dashboard/GuardarLineaBaseButton'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
 
 const FILTRO_VACIO: FiltroGrupo = { sucursalId: null, unidadId: null, cargoId: null, turnoId: null }
 
@@ -201,7 +202,11 @@ export function ResumenInteractivo({
             </Select>
           </div>
         </div>
-        {!hayFiltroActivo ? (
+        {hayFiltroActivo ? (
+          <Button type="button" variant="outline" size="sm" onClick={() => setFiltro(FILTRO_VACIO)}>
+            Limpiar filtros
+          </Button>
+        ) : (
           <GuardarLineaBaseButton
             tenantId={tenantId}
             empresaId={empresaId}
@@ -211,14 +216,16 @@ export function ResumenInteractivo({
             periodoFin={periodoFin}
             indicadores={resultadosSinFiltro}
           />
-        ) : null}
+        )}
       </div>
 
       {hayFiltroActivo ? (
-        <p className="text-xs text-muted-foreground">
-          Mostrando {personasFiltradas.length} de {personas.length} personas. La comparación con línea base solo
-          está disponible sin filtros.
-        </p>
+        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-1 font-medium text-foreground">
+            {personasFiltradas.length} de {personas.length} personas
+          </span>
+          <span>La comparación con línea base solo está disponible sin filtros.</span>
+        </div>
       ) : (
         <p className="text-xs text-muted-foreground">{personas.length} personas activas.</p>
       )}
