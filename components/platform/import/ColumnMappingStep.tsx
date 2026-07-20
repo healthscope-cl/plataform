@@ -18,6 +18,10 @@ const FIELD_LABELS: Record<CanonicalField, string> = {
   dias: 'Días de ausencia (obligatorio)',
   tipoAdministrativo: 'Tipo administrativo (obligatorio)',
   codigoPersona: 'Código de persona',
+  sucursal: 'Sucursal',
+  unidad: 'Unidad',
+  cargo: 'Cargo',
+  turno: 'Turno',
 }
 
 export function ColumnMappingStep({

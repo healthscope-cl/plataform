@@ -597,7 +597,6 @@ git commit -m "feat: add pure name-to-catalog-id resolver for import group match
 ### Task 5: Wire organizational columns through the import wizard
 
 **Files:**
-- Modify: `components/platform/import/ColumnMappingStep.tsx`
 - Modify: `app/plataforma/importar/page.tsx`
 - Modify: `app/api/platform/importaciones/ejecutar/route.ts`
 
@@ -608,30 +607,14 @@ git commit -m "feat: add pure name-to-catalog-id resolver for import group match
   by. No new task depends on new exports from this task — it's the last link before the
   filter UI.
 
-- [ ] **Step 1: Modify `components/platform/import/ColumnMappingStep.tsx`**
+> **Note (corrected during execution):** `components/platform/import/ColumnMappingStep.tsx`'s
+> `FIELD_LABELS` update was originally planned as this task's Step 1, but
+> `Record<CanonicalField, string>` requires every union member as a key — widening
+> `CanonicalField` in Task 3 doesn't typecheck without also updating `FIELD_LABELS` in the
+> same commit. Task 3 already made this change (verified in review, commit `9e3785d`); there
+> is nothing left to do to that file here.
 
-Replace the `FIELD_LABELS` object with:
-
-```typescript
-const FIELD_LABELS: Record<CanonicalField, string> = {
-  rut: 'RUT (obligatorio)',
-  fechaInicio: 'Fecha de inicio (obligatorio)',
-  fechaFin: 'Fecha de fin',
-  dias: 'Días de ausencia (obligatorio)',
-  tipoAdministrativo: 'Tipo administrativo (obligatorio)',
-  codigoPersona: 'Código de persona',
-  sucursal: 'Sucursal',
-  unidad: 'Unidad',
-  cargo: 'Cargo',
-  turno: 'Turno',
-}
-```
-
-No other change in this file — `requiredFields` stays as-is (the 4 new fields are optional),
-and the `CANONICAL_FIELDS.map(...)` render loop already iterates generically, so it will
-render 4 more `Select` dropdowns automatically.
-
-- [ ] **Step 2: Modify `app/plataforma/importar/page.tsx`**
+- [ ] **Step 1: Modify `app/plataforma/importar/page.tsx`**
 
 Replace the `toMappedRows` function with:
 
@@ -666,7 +649,7 @@ function toMappedRows(
 Nothing else in this file changes — `handleEjecutar` already sends `mappedRows` wholesale in
 the request body, so the 4 new fields ride along automatically.
 
-- [ ] **Step 3: Modify `app/api/platform/importaciones/ejecutar/route.ts`**
+- [ ] **Step 2: Modify `app/api/platform/importaciones/ejecutar/route.ts`**
 
 Add this import alongside the existing ones at the top of the file:
 
@@ -825,15 +808,15 @@ And change that `update` call's `advertencias` field from `validation.resumen.ad
 
 (Every other field in that `update` call stays exactly as it is today.)
 
-- [ ] **Step 4: Run typecheck**
+- [ ] **Step 3: Run typecheck**
 
 Run: `NODE_OPTIONS="--max-old-space-size=768" ./node_modules/.bin/tsc --noEmit -p .`
 Expected: no errors
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
-git add components/platform/import/ColumnMappingStep.tsx app/plataforma/importar/page.tsx app/api/platform/importaciones/ejecutar/route.ts
+git add app/plataforma/importar/page.tsx app/api/platform/importaciones/ejecutar/route.ts
 git commit -m "feat: resolve sucursal/unidad/cargo/turno to catalog IDs during import execution"
 ```
 

@@ -6,6 +6,7 @@ import { clasificarEpisodio } from '@/lib/ingestion/classification'
 import { hashRut } from '@/lib/ingestion/rutHash'
 import { validateRows, type MappedRow } from '@/lib/ingestion/validate'
 import type { TipoAdministrativoClave } from '@/lib/ingestion/types'
+import { resolveIdPorNombre, resolveUnidadId } from '@/lib/ingestion/groupMatching'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -35,7 +36,15 @@ export async function POST(request: Request) {
     archivoHash: string
     empresaId: string
     forzarReimportacion?: boolean
-    rows: Array<MappedRow & { codigoPersona: string | null }>
+    rows: Array<
+      MappedRow & {
+        codigoPersona: string | null
+        sucursal: string | null
+        unidad: string | null
+        cargo: string | null
+        turno: string | null
+      }
+    >
   }
 
   const admin = createAdminClient()
@@ -92,6 +101,51 @@ export async function POST(request: Request) {
     (tiposAdministrativos ?? []).map((tipo) => [tipo.clave as string, tipo.id as string])
   )
 
+  const { data: sucursalRows } = await admin
+    .from('sucursales')
+    .select('id, nombre')
+    .eq('tenant_id', tenantId)
+    .eq('empresa_id', body.empresaId)
+  const sucursales = (sucursalRows ?? []).map((row) => ({ id: row.id as string, nombre: row.nombre as string }))
+  const sucursalIds = sucursales.map((s) => s.id)
+
+  const { data: unidadRows } =
+    sucursalIds.length > 0
+      ? await admin
+          .from('unidades')
+          .select('id, nombre, sucursal_id')
+          .eq('tenant_id', tenantId)
+          .in('sucursal_id', sucursalIds)
+      : { data: [] }
+  const unidades = (unidadRows ?? []).map((row) => ({
+    id: row.id as string,
+    nombre: row.nombre as string,
+    sucursalId: row.sucursal_id as string,
+  }))
+
+  const { data: cargoRows } = await admin
+    .from('cargos')
+    .select('id, nombre')
+    .eq('tenant_id', tenantId)
+    .eq('empresa_id', body.empresaId)
+  const cargos = (cargoRows ?? []).map((row) => ({ id: row.id as string, nombre: row.nombre as string }))
+
+  const { data: turnoRows } = await admin
+    .from('turnos')
+    .select('id, nombre')
+    .eq('tenant_id', tenantId)
+    .eq('empresa_id', body.empresaId)
+  const turnos = (turnoRows ?? []).map((row) => ({ id: row.id as string, nombre: row.nombre as string }))
+
+  const advertenciasGrupo: Array<{
+    tenant_id: string
+    importacion_id: string
+    fila: number
+    severidad: 'advertencia'
+    tipo: string
+    mensaje: string
+  }> = []
+
   const validation = validateRows({ rows: body.rows, tiposValidos })
 
   const erroresCalidadRows = Array.from(validation.filaErrors.entries()).flatMap(([fila, errors]) =>
@@ -136,6 +190,42 @@ export async function POST(request: Request) {
 
     let personaId = existingPersona?.id as string | undefined
     if (!personaId) {
+      const unidadId = resolveUnidadId(row.unidad, row.sucursal, sucursales, unidades)
+      if (row.unidad && !unidadId) {
+        advertenciasGrupo.push({
+          tenant_id: tenantId,
+          importacion_id: importacion.id,
+          fila: index,
+          severidad: 'advertencia',
+          tipo: 'grupo_no_reconocido',
+          mensaje: `La unidad "${row.unidad}" no existe en el catálogo; la persona quedará sin unidad asignada.`,
+        })
+      }
+
+      const cargoId = resolveIdPorNombre(row.cargo, cargos)
+      if (row.cargo && !cargoId) {
+        advertenciasGrupo.push({
+          tenant_id: tenantId,
+          importacion_id: importacion.id,
+          fila: index,
+          severidad: 'advertencia',
+          tipo: 'grupo_no_reconocido',
+          mensaje: `El cargo "${row.cargo}" no existe en el catálogo; la persona quedará sin cargo asignado.`,
+        })
+      }
+
+      const turnoId = resolveIdPorNombre(row.turno, turnos)
+      if (row.turno && !turnoId) {
+        advertenciasGrupo.push({
+          tenant_id: tenantId,
+          importacion_id: importacion.id,
+          fila: index,
+          severidad: 'advertencia',
+          tipo: 'grupo_no_reconocido',
+          mensaje: `El turno "${row.turno}" no existe en el catálogo; la persona quedará sin turno asignado.`,
+        })
+      }
+
       const { data: newPersona, error: personaError } = await admin
         .from('personas')
         .insert({
@@ -143,6 +233,9 @@ export async function POST(request: Request) {
           empresa_id: body.empresaId,
           codigo: row.codigoPersona ?? rutHash.slice(0, 8),
           rut_hash: rutHash,
+          unidad_id: unidadId,
+          cargo_id: cargoId,
+          turno_id: turnoId,
         })
         .select()
         .single()
@@ -186,13 +279,17 @@ export async function POST(request: Request) {
     filasProcesadas += 1
   }
 
+  if (advertenciasGrupo.length > 0) {
+    await admin.from('errores_calidad').insert(advertenciasGrupo)
+  }
+
   await admin
     .from('importaciones')
     .update({
       estado: 'completada',
       filas_procesadas: filasProcesadas,
       filas_rechazadas: filasRechazadas,
-      advertencias: validation.resumen.advertencias,
+      advertencias: validation.resumen.advertencias + advertenciasGrupo.length,
     })
     .eq('id', importacion.id)
 

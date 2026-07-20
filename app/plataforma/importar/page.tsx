@@ -32,7 +32,15 @@ const TIPOS_VALIDOS = [
 function toMappedRows(
   parsed: ParsedSpreadsheet,
   mapping: Record<CanonicalField, string | null>
-): Array<MappedRow & { codigoPersona: string | null }> {
+): Array<
+  MappedRow & {
+    codigoPersona: string | null
+    sucursal: string | null
+    unidad: string | null
+    cargo: string | null
+    turno: string | null
+  }
+> {
   return parsed.rows.map((row) => ({
     rut: mapping.rut ? String(row[mapping.rut] ?? '') || null : null,
     fechaInicio: mapping.fechaInicio ? String(row[mapping.fechaInicio] ?? '') || null : null,
@@ -40,6 +48,10 @@ function toMappedRows(
     dias: mapping.dias ? Number(row[mapping.dias]) : null,
     tipoAdministrativo: mapping.tipoAdministrativo ? String(row[mapping.tipoAdministrativo] ?? '') || null : null,
     codigoPersona: mapping.codigoPersona ? String(row[mapping.codigoPersona] ?? '') || null : null,
+    sucursal: mapping.sucursal ? String(row[mapping.sucursal] ?? '') || null : null,
+    unidad: mapping.unidad ? String(row[mapping.unidad] ?? '') || null : null,
+    cargo: mapping.cargo ? String(row[mapping.cargo] ?? '') || null : null,
+    turno: mapping.turno ? String(row[mapping.turno] ?? '') || null : null,
   }))
 }
 
