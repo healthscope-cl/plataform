@@ -504,3 +504,63 @@ create policy "reglas_alerta_update_admin" on reglas_alerta
 
 grant select, insert, update on reglas_alerta to authenticated;
 grant all on reglas_alerta to service_role;
+
+-- ============================================================
+-- SURVEYS: encuestas, encuesta_respuestas
+-- ============================================================
+
+create table encuestas (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  empresa_id uuid not null references empresas(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  creada_por uuid not null references usuarios(id),
+  titulo text not null,
+  descripcion text,
+  pregunta_ids text[] not null,
+  estado text not null default 'borrador' check (estado in ('borrador', 'activa', 'cerrada')),
+  fecha_apertura date,
+  fecha_cierre date
+);
+
+alter table encuestas enable row level security;
+
+create policy "encuestas_select_same_tenant" on encuestas
+  for select to authenticated using (tenant_id = auth_tenant_id());
+
+create policy "encuestas_select_public_activa" on encuestas
+  for select to anon, authenticated using (estado = 'activa');
+
+create policy "encuestas_insert_admin" on encuestas
+  for insert to authenticated
+  with check (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']));
+
+create policy "encuestas_update_admin" on encuestas
+  for update to authenticated
+  using (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']))
+  with check (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']));
+
+grant select, insert, update on encuestas to authenticated;
+grant select on encuestas to anon;
+grant all on encuestas to service_role;
+
+create table encuesta_respuestas (
+  id uuid primary key default gen_random_uuid(),
+  encuesta_id uuid not null references encuestas(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  respuestas jsonb not null
+);
+
+alter table encuesta_respuestas enable row level security;
+
+create policy "encuesta_respuestas_insert_activa" on encuesta_respuestas
+  for insert to anon, authenticated
+  with check (encuesta_id in (select id from encuestas where estado = 'activa'));
+
+create policy "encuesta_respuestas_select_same_tenant" on encuesta_respuestas
+  for select to authenticated
+  using (encuesta_id in (select id from encuestas where tenant_id = auth_tenant_id()));
+
+grant insert on encuesta_respuestas to anon;
+grant insert, select on encuesta_respuestas to authenticated;
+grant all on encuesta_respuestas to service_role;
