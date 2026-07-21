@@ -5,6 +5,7 @@ const NAV_ITEMS = [
   { href: '/plataforma/resumen', label: 'Resumen', adminOnly: false },
   { href: '/plataforma/alertas', label: 'Alertas', adminOnly: true },
   { href: '/plataforma/encuestas', label: 'Encuestas', adminOnly: true },
+  { href: '/plataforma/seguridad', label: 'Seguridad laboral', adminOnly: true },
   { href: '/plataforma/organizacion', label: 'Organización', adminOnly: true },
   { href: '/plataforma/importar', label: 'Importar datos', adminOnly: true },
   { href: '/plataforma/importar/historial', label: 'Historial de importaciones', adminOnly: true },
