@@ -560,3 +560,59 @@ create policy "encuesta_respuestas_insert_activa" on encuesta_respuestas
 grant insert on encuesta_respuestas to anon;
 grant insert on encuesta_respuestas to authenticated;
 grant all on encuesta_respuestas to service_role;
+
+-- ============================================================
+-- WORKPLACE SAFETY: eventos_seguridad
+-- ============================================================
+
+create table eventos_seguridad (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  empresa_id uuid not null references empresas(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  creada_por uuid references usuarios(id),
+  tipo text not null check (tipo in ('accidente', 'incidente', 'cuasi_accidente', 'condicion_insegura')),
+  descripcion text not null,
+  gravedad text not null check (gravedad in ('leve', 'moderada', 'grave')),
+  fecha date not null,
+  sucursal_id uuid references sucursales(id) on delete set null,
+  unidad_id uuid references unidades(id) on delete set null,
+  cargo_id uuid references cargos(id) on delete set null,
+  turno_id uuid references turnos(id) on delete set null,
+  estado text not null default 'abierto' check (estado in ('abierto', 'en_seguimiento', 'cerrado')),
+  accion_correctiva text
+);
+
+alter table eventos_seguridad enable row level security;
+
+create policy "eventos_seguridad_select_same_tenant" on eventos_seguridad
+  for select to authenticated using (tenant_id = auth_tenant_id());
+
+create policy "eventos_seguridad_insert_admin" on eventos_seguridad
+  for insert to authenticated
+  with check (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']));
+
+-- security definer so anon (no SELECT grant on empresas) can still verify the submitted
+-- tenant_id matches the submitted empresa_id's real tenant; mirrors auth_tenant_id() above.
+create function empresa_tenant_id(empresa uuid) returns uuid
+language sql stable security definer set search_path = public
+as $$
+  select tenant_id from empresas where id = empresa
+$$;
+
+create policy "eventos_seguridad_insert_publico" on eventos_seguridad
+  for insert to anon, authenticated
+  with check (
+    tipo in ('cuasi_accidente', 'condicion_insegura')
+    and gravedad = 'leve'
+    and tenant_id = empresa_tenant_id(empresa_id)
+  );
+
+create policy "eventos_seguridad_update_admin" on eventos_seguridad
+  for update to authenticated
+  using (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']))
+  with check (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']));
+
+grant select, insert, update on eventos_seguridad to authenticated;
+grant insert on eventos_seguridad to anon;
+grant all on eventos_seguridad to service_role;
