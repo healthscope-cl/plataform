@@ -557,10 +557,6 @@ create policy "encuesta_respuestas_insert_activa" on encuesta_respuestas
   for insert to anon, authenticated
   with check (encuesta_id in (select id from encuestas where estado = 'activa'));
 
-create policy "encuesta_respuestas_select_same_tenant" on encuesta_respuestas
-  for select to authenticated
-  using (encuesta_id in (select id from encuestas where tenant_id = auth_tenant_id()));
-
 grant insert on encuesta_respuestas to anon;
-grant insert, select on encuesta_respuestas to authenticated;
+grant insert on encuesta_respuestas to authenticated;
 grant all on encuesta_respuestas to service_role;

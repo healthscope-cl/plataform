@@ -152,19 +152,29 @@ create policy "encuesta_respuestas_insert_activa" on encuesta_respuestas
   for insert to anon, authenticated
   with check (encuesta_id in (select id from encuestas where estado = 'activa'));
 
-create policy "encuesta_respuestas_select_same_tenant" on encuesta_respuestas
-  for select to authenticated
-  using (encuesta_id in (select id from encuestas where tenant_id = auth_tenant_id()));
-
 grant insert on encuesta_respuestas to anon;
-grant insert, select on encuesta_respuestas to authenticated;
+grant insert on encuesta_respuestas to authenticated;
 grant all on encuesta_respuestas to service_role;
 ```
 
+> **Note (corrected during execution):** the SQL above originally also included a
+> `encuesta_respuestas_select_same_tenant` policy granting `authenticated` SELECT on raw
+> response rows (and a matching `grant insert, select ... to authenticated`), reasoning that
+> tenant-scoped access was enough protection. Code review caught that this defeats the
+> small-group suppression in `lib/encuestas/agregar.ts` (`MIN_GROUP_SIZE`): suppression only
+> runs in the Server Component that calls it, so any authenticated user could bypass it by
+> querying `encuesta_respuestas` directly and reading raw per-response answers for a
+> small company — the exact reidentification risk suppression exists to prevent. The policy
+> and the `select` grant were removed; no `authenticated`-role SELECT policy exists on this
+> table at all now. `service_role` (via `lib/supabase/admin.ts`'s `createAdminClient()`) is
+> the only reader of raw response rows — see the corrected Task 4 below.
+
 No update/delete policy or grant on either table for `authenticated` beyond what's listed —
 `encuestas` allows `update` only for the admin-gated state transitions (Task 3), and
-`encuesta_respuestas` allows no update/delete for anyone except `service_role` (Global
-Constraints: a submitted response is never editable or deletable).
+`encuesta_respuestas` allows no select/update/delete for anyone except `service_role` (Global
+Constraints: a submitted response is never editable or deletable, and raw responses are never
+readable by `authenticated`/`anon` — only aggregated results are, via the results page's use of
+`createAdminClient()`).
 
 The `encuestas_select_public_activa` policy uses `anon, authenticated` (not `anon` alone) so
 that a logged-in user (e.g. an admin previewing the link, or someone logged into an unrelated
@@ -755,6 +765,7 @@ git commit -m "feat: add survey creation and management page"
 ```tsx
 import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { mapEncuestaRow, mapEncuestaRespuestaRow } from '@/lib/encuestas/types'
 import { agregarRespuestas } from '@/lib/encuestas/agregar'
 import { CATALOGO_PREGUNTAS } from '@/lib/encuestas/catalogo'
@@ -771,7 +782,11 @@ export default async function ResultadosEncuestaPage({ params }: { params: Promi
   if (!encuestaRow) notFound()
   const encuesta = mapEncuestaRow(encuestaRow)
 
-  const { data: respuestaRows } = await supabase.from('encuesta_respuestas').select('*').eq('encuesta_id', id)
+  // Raw individual responses have no authenticated-role SELECT policy by design (see Task 1) —
+  // this Server Component is the one place allowed to see them, precisely so it can aggregate
+  // (and apply small-group suppression) before anything reaches the browser.
+  const admin = createAdminClient()
+  const { data: respuestaRows } = await admin.from('encuesta_respuestas').select('*').eq('encuesta_id', id)
   const respuestas = (respuestaRows ?? []).map(mapEncuestaRespuestaRow)
 
   const resultados = agregarRespuestas({
