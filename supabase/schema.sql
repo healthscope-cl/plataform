@@ -592,11 +592,20 @@ create policy "eventos_seguridad_insert_admin" on eventos_seguridad
   for insert to authenticated
   with check (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']));
 
+-- security definer so anon (no SELECT grant on empresas) can still verify the submitted
+-- tenant_id matches the submitted empresa_id's real tenant; mirrors auth_tenant_id() above.
+create function empresa_tenant_id(empresa uuid) returns uuid
+language sql stable security definer set search_path = public
+as $$
+  select tenant_id from empresas where id = empresa
+$$;
+
 create policy "eventos_seguridad_insert_publico" on eventos_seguridad
   for insert to anon, authenticated
   with check (
     tipo in ('cuasi_accidente', 'condicion_insegura')
-    and tenant_id = (select tenant_id from empresas where id = empresa_id)
+    and gravedad = 'leve'
+    and tenant_id = empresa_tenant_id(empresa_id)
   );
 
 create policy "eventos_seguridad_update_admin" on eventos_seguridad
