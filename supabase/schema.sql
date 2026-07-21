@@ -464,3 +464,43 @@ create policy "lineas_base_insert_admin" on lineas_base
 
 grant select, insert on lineas_base to authenticated;
 grant all on lineas_base to service_role;
+
+-- ============================================================
+-- ALERTS: reglas_alerta
+-- ============================================================
+
+create table reglas_alerta (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  empresa_id uuid not null references empresas(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  creada_por uuid not null references usuarios(id),
+  nombre text not null,
+  indicador text not null check (indicador in (
+    'tasaAusentismo', 'frecuencia', 'severidad', 'duracionPromedio', 'reincidencia', 'costoEstimado'
+  )),
+  operador text not null check (operador in ('mayor_que', 'mayor_o_igual')),
+  umbral numeric not null,
+  sucursal_id uuid references sucursales(id) on delete set null,
+  unidad_id uuid references unidades(id) on delete set null,
+  cargo_id uuid references cargos(id) on delete set null,
+  turno_id uuid references turnos(id) on delete set null,
+  activa boolean not null default true
+);
+
+alter table reglas_alerta enable row level security;
+
+create policy "reglas_alerta_select_same_tenant" on reglas_alerta
+  for select to authenticated using (tenant_id = auth_tenant_id());
+
+create policy "reglas_alerta_insert_admin" on reglas_alerta
+  for insert to authenticated
+  with check (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']));
+
+create policy "reglas_alerta_update_admin" on reglas_alerta
+  for update to authenticated
+  using (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']))
+  with check (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']));
+
+grant select, insert, update on reglas_alerta to authenticated;
+grant all on reglas_alerta to service_role;
