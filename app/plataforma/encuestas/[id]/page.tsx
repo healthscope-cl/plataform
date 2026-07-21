@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { mapEncuestaRow, mapEncuestaRespuestaRow } from '@/lib/encuestas/types'
 import { agregarRespuestas } from '@/lib/encuestas/agregar'
 import { CATALOGO_PREGUNTAS } from '@/lib/encuestas/catalogo'
+import { mapUsuarioRow } from '@/lib/platform/types'
 
 export default async function ResultadosEncuestaPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -13,9 +14,14 @@ export default async function ResultadosEncuestaPage({ params }: { params: Promi
   } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
+  const { data: usuarioRow } = await supabase.from('usuarios').select('*, roles(*)').eq('id', user.id).single()
+  if (!usuarioRow) redirect('/login')
+  const usuario = mapUsuarioRow(usuarioRow)
+
   const { data: encuestaRow } = await supabase.from('encuestas').select('*').eq('id', id).maybeSingle()
   if (!encuestaRow) notFound()
   const encuesta = mapEncuestaRow(encuestaRow)
+  if (encuesta.tenantId !== usuario.tenantId) notFound()
 
   // Raw individual responses have no authenticated-role SELECT policy by design (see Task 1) —
   // this Server Component is the one place allowed to see them, precisely so it can aggregate
