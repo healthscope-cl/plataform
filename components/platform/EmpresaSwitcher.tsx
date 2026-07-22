@@ -21,7 +21,7 @@ export function EmpresaSwitcher({ empresas }: { empresas: Empresa[] }) {
   return (
     <Select defaultValue={empresas[0].id}>
       <SelectTrigger className="w-48">
-        <SelectValue />
+        <SelectValue>{(id: string) => empresas.find((empresa) => empresa.id === id)?.nombre ?? id}</SelectValue>
       </SelectTrigger>
       <SelectContent>
         {empresas.map((empresa) => (

@@ -126,7 +126,11 @@ export function ResumenInteractivo({
               onValueChange={(valor) => actualizarFiltro('sucursalId', valor === '__todas__' ? null : valor)}
             >
               <SelectTrigger id="filtro-sucursal" className="w-full">
-                <SelectValue />
+                <SelectValue>
+                  {(valor: string) =>
+                    valor === '__todas__' ? 'Todas' : (sucursales.find((s) => s.id === valor)?.nombre ?? valor)
+                  }
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__todas__">Todas</SelectItem>
@@ -147,7 +151,11 @@ export function ResumenInteractivo({
               onValueChange={(valor) => actualizarFiltro('unidadId', valor === '__todas__' ? null : valor)}
             >
               <SelectTrigger id="filtro-unidad" className="w-full">
-                <SelectValue />
+                <SelectValue>
+                  {(valor: string) =>
+                    valor === '__todas__' ? 'Todas' : (unidadesDisponibles.find((u) => u.id === valor)?.nombre ?? valor)
+                  }
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__todas__">Todas</SelectItem>
@@ -168,7 +176,11 @@ export function ResumenInteractivo({
               onValueChange={(valor) => actualizarFiltro('cargoId', valor === '__todos__' ? null : valor)}
             >
               <SelectTrigger id="filtro-cargo" className="w-full">
-                <SelectValue />
+                <SelectValue>
+                  {(valor: string) =>
+                    valor === '__todos__' ? 'Todos' : (cargos.find((c) => c.id === valor)?.nombre ?? valor)
+                  }
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__todos__">Todos</SelectItem>
@@ -189,7 +201,11 @@ export function ResumenInteractivo({
               onValueChange={(valor) => actualizarFiltro('turnoId', valor === '__todos__' ? null : valor)}
             >
               <SelectTrigger id="filtro-turno" className="w-full">
-                <SelectValue />
+                <SelectValue>
+                  {(valor: string) =>
+                    valor === '__todos__' ? 'Todos' : (turnos.find((t) => t.id === valor)?.nombre ?? valor)
+                  }
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__todos__">Todos</SelectItem>
