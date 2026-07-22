@@ -111,7 +111,7 @@ export function EvaluacionErgonomicaSheet({
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-4">
           <div className="space-y-2">
             <Label htmlFor="cargoId">Cargo</Label>
-            <Select value={form.watch('cargoId') as string} onValueChange={(v) => { if (v) form.setValue('cargoId', v) }}>
+            <Select value={form.watch('cargoId')} onValueChange={(v) => form.setValue('cargoId', v as string)}>
               <SelectTrigger id="cargoId" className="w-full">
                 <SelectValue>{(valor: string) => cargos.find((c) => c.id === valor)?.nombre ?? valor}</SelectValue>
               </SelectTrigger>
@@ -128,8 +128,8 @@ export function EvaluacionErgonomicaSheet({
             <div className="space-y-2">
               <Label htmlFor="eval-sucursal">Sucursal</Label>
               <Select
-                value={(form.watch('sucursalId') ?? '__ninguna__') as string}
-                onValueChange={(v) => { if (v) form.setValue('sucursalId', v === '__ninguna__' ? null : v) }}
+                value={form.watch('sucursalId') ?? '__ninguna__'}
+                onValueChange={(v) => form.setValue('sucursalId', v === '__ninguna__' ? null : v)}
               >
                 <SelectTrigger id="eval-sucursal" className="w-full">
                   <SelectValue>
@@ -156,8 +156,8 @@ export function EvaluacionErgonomicaSheet({
           <div className="space-y-2">
             <Label htmlFor="nivelRiesgo">Nivel de riesgo</Label>
             <Select
-              value={form.watch('nivelRiesgo') as FormValues['nivelRiesgo']}
-              onValueChange={(v) => { if (v) form.setValue('nivelRiesgo', v as FormValues['nivelRiesgo']) }}
+              value={form.watch('nivelRiesgo')}
+              onValueChange={(v) => form.setValue('nivelRiesgo', v as FormValues['nivelRiesgo'])}
             >
               <SelectTrigger id="nivelRiesgo" className="w-full">
                 <SelectValue>{(valor: FormValues['nivelRiesgo']) => NIVEL_RIESGO_LABELS[valor]}</SelectValue>
