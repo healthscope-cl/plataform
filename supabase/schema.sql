@@ -652,3 +652,40 @@ create policy "evaluaciones_ergonomicas_update_admin" on evaluaciones_ergonomica
 
 grant select, insert, update on evaluaciones_ergonomicas to authenticated;
 grant all on evaluaciones_ergonomicas to service_role;
+
+-- ============================================================
+-- INTERVENTIONS: intervenciones
+-- ============================================================
+
+create table intervenciones (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  empresa_id uuid not null references empresas(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  creada_por uuid not null references usuarios(id),
+  problema text not null,
+  objetivo text not null,
+  responsable text not null,
+  presupuesto numeric,
+  fecha date not null,
+  indicadores text not null,
+  resultado text,
+  estado text not null default 'planificada' check (estado in ('planificada', 'en_ejecucion', 'completada'))
+);
+
+alter table intervenciones enable row level security;
+
+create policy "intervenciones_select_same_tenant" on intervenciones
+  for select to authenticated using (tenant_id = auth_tenant_id());
+
+create policy "intervenciones_insert_admin" on intervenciones
+  for insert to authenticated
+  with check (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']));
+
+create policy "intervenciones_update_admin" on intervenciones
+  for update to authenticated
+  using (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']))
+  with check (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']));
+
+grant select, insert, update on intervenciones to authenticated;
+grant all on intervenciones to service_role;
