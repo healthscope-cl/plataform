@@ -689,3 +689,45 @@ create policy "intervenciones_update_admin" on intervenciones
 
 grant select, insert, update on intervenciones to authenticated;
 grant all on intervenciones to service_role;
+
+-- ============================================================
+-- CAMPAIGNS: campanas
+-- ============================================================
+
+create table campanas (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  empresa_id uuid not null references empresas(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  creada_por uuid not null references usuarios(id),
+  tipo text not null check (tipo in (
+    'bienestar', 'salud_mental', 'ergonomia', 'vacunacion', 'pausas_activas',
+    'prevencion', 'sueno', 'alimentacion', 'liderazgo'
+  )),
+  nombre text not null,
+  fecha_inicio date not null,
+  fecha_fin date,
+  responsable text not null,
+  proveedor text,
+  costo numeric,
+  participantes integer,
+  resultado text,
+  estado text not null default 'planificada' check (estado in ('planificada', 'activa', 'finalizada'))
+);
+
+alter table campanas enable row level security;
+
+create policy "campanas_select_same_tenant" on campanas
+  for select to authenticated using (tenant_id = auth_tenant_id());
+
+create policy "campanas_insert_admin" on campanas
+  for insert to authenticated
+  with check (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']));
+
+create policy "campanas_update_admin" on campanas
+  for update to authenticated
+  using (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']))
+  with check (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']));
+
+grant select, insert, update on campanas to authenticated;
+grant all on campanas to service_role;
