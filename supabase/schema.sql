@@ -616,3 +616,39 @@ create policy "eventos_seguridad_update_admin" on eventos_seguridad
 grant select, insert, update on eventos_seguridad to authenticated;
 grant insert on eventos_seguridad to anon;
 grant all on eventos_seguridad to service_role;
+
+-- ============================================================
+-- ERGONOMICS: evaluaciones_ergonomicas
+-- ============================================================
+
+create table evaluaciones_ergonomicas (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  empresa_id uuid not null references empresas(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  creada_por uuid not null references usuarios(id),
+  cargo_id uuid not null references cargos(id) on delete cascade,
+  sucursal_id uuid references sucursales(id) on delete set null,
+  fecha date not null,
+  nivel_riesgo text not null check (nivel_riesgo in ('bajo', 'medio', 'alto')),
+  hallazgos text not null,
+  recomendaciones text,
+  estado text not null default 'pendiente' check (estado in ('pendiente', 'en_progreso', 'resuelto'))
+);
+
+alter table evaluaciones_ergonomicas enable row level security;
+
+create policy "evaluaciones_ergonomicas_select_same_tenant" on evaluaciones_ergonomicas
+  for select to authenticated using (tenant_id = auth_tenant_id());
+
+create policy "evaluaciones_ergonomicas_insert_admin" on evaluaciones_ergonomicas
+  for insert to authenticated
+  with check (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']));
+
+create policy "evaluaciones_ergonomicas_update_admin" on evaluaciones_ergonomicas
+  for update to authenticated
+  using (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']))
+  with check (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']));
+
+grant select, insert, update on evaluaciones_ergonomicas to authenticated;
+grant all on evaluaciones_ergonomicas to service_role;
