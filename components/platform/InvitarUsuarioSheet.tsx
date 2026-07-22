@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { ROLE_KEYS, type RoleKey } from '@/lib/platform/roles'
+import { ROLE_KEYS, ROLE_LABELS, type RoleKey } from '@/lib/platform/roles'
 import type { Usuario } from '@/lib/platform/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -87,12 +87,12 @@ export function InvitarUsuarioSheet({ onInvited }: { onInvited: (usuario: Usuari
               onValueChange={(value) => form.setValue('rolClave', value as RoleKey)}
             >
               <SelectTrigger id="rolClave" className="w-full">
-                <SelectValue />
+                <SelectValue>{(clave: RoleKey) => ROLE_LABELS[clave]}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {ROLE_KEYS.map((clave) => (
                   <SelectItem key={clave} value={clave}>
-                    {clave}
+                    {ROLE_LABELS[clave]}
                   </SelectItem>
                 ))}
               </SelectContent>

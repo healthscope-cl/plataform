@@ -56,7 +56,9 @@ export function ReportarForm({
         <Label htmlFor="reportar-tipo">Tipo</Label>
         <Select value={tipo} onValueChange={(v) => setTipo(v as TipoPublico)}>
           <SelectTrigger id="reportar-tipo" className="w-full">
-            <SelectValue />
+            <SelectValue>
+              {(valor: TipoPublico) => TIPOS_PUBLICOS.find((t) => t.value === valor)?.label ?? valor}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {TIPOS_PUBLICOS.map((t) => (
@@ -84,7 +86,11 @@ export function ReportarForm({
             onValueChange={(v) => setSucursalId(v === '__ninguna__' ? null : v)}
           >
             <SelectTrigger id="reportar-sucursal" className="w-full">
-              <SelectValue />
+              <SelectValue>
+                {(valor: string) =>
+                  valor === '__ninguna__' ? 'Prefiero no decir' : (sucursales.find((s) => s.id === valor)?.nombre ?? valor)
+                }
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="__ninguna__">Prefiero no decir</SelectItem>

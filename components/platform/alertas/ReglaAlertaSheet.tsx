@@ -22,6 +22,11 @@ const INDICADORES = [
   { value: 'costoEstimado', label: 'Costo estimado' },
 ] as const
 
+const OPERADOR_LABELS = {
+  mayor_que: 'Mayor que',
+  mayor_o_igual: 'Mayor o igual a',
+} as const
+
 const schema = z.strictObject({
   nombre: z.string().min(1, 'Requerido'),
   indicador: z.enum([
@@ -164,7 +169,11 @@ export function ReglaAlertaSheet({
               onValueChange={(valor) => form.setValue('indicador', valor as z.infer<typeof schema>['indicador'])}
             >
               <SelectTrigger id="indicador" className="w-full">
-                <SelectValue />
+                <SelectValue>
+                  {(valor: z.infer<typeof schema>['indicador']) =>
+                    INDICADORES.find((item) => item.value === valor)?.label ?? valor
+                  }
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {INDICADORES.map((item) => (
@@ -184,11 +193,13 @@ export function ReglaAlertaSheet({
                 onValueChange={(valor) => form.setValue('operador', valor as z.infer<typeof schema>['operador'])}
               >
                 <SelectTrigger id="operador" className="w-full">
-                  <SelectValue />
+                  <SelectValue>
+                    {(valor: z.infer<typeof schema>['operador']) => OPERADOR_LABELS[valor]}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="mayor_que">Mayor que</SelectItem>
-                  <SelectItem value="mayor_o_igual">Mayor o igual a</SelectItem>
+                  <SelectItem value="mayor_que">{OPERADOR_LABELS.mayor_que}</SelectItem>
+                  <SelectItem value="mayor_o_igual">{OPERADOR_LABELS.mayor_o_igual}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -214,7 +225,11 @@ export function ReglaAlertaSheet({
                 }}
               >
                 <SelectTrigger id="regla-sucursal" className="w-full">
-                  <SelectValue />
+                  <SelectValue>
+                    {(valor: string) =>
+                      valor === '__todas__' ? 'Toda la empresa' : (sucursales.find((s) => s.id === valor)?.nombre ?? valor)
+                    }
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__todas__">Toda la empresa</SelectItem>
@@ -233,7 +248,11 @@ export function ReglaAlertaSheet({
                 onValueChange={(valor) => form.setValue('unidadId', valor === '__todas__' ? null : valor)}
               >
                 <SelectTrigger id="regla-unidad" className="w-full">
-                  <SelectValue />
+                  <SelectValue>
+                    {(valor: string) =>
+                      valor === '__todas__' ? 'Todas' : (unidadesDisponibles.find((u) => u.id === valor)?.nombre ?? valor)
+                    }
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__todas__">Todas</SelectItem>
@@ -255,7 +274,11 @@ export function ReglaAlertaSheet({
                 onValueChange={(valor) => form.setValue('cargoId', valor === '__todos__' ? null : valor)}
               >
                 <SelectTrigger id="regla-cargo" className="w-full">
-                  <SelectValue />
+                  <SelectValue>
+                    {(valor: string) =>
+                      valor === '__todos__' ? 'Todos' : (cargos.find((c) => c.id === valor)?.nombre ?? valor)
+                    }
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__todos__">Todos</SelectItem>
@@ -274,7 +297,11 @@ export function ReglaAlertaSheet({
                 onValueChange={(valor) => form.setValue('turnoId', valor === '__todos__' ? null : valor)}
               >
                 <SelectTrigger id="regla-turno" className="w-full">
-                  <SelectValue />
+                  <SelectValue>
+                    {(valor: string) =>
+                      valor === '__todos__' ? 'Todos' : (turnos.find((t) => t.id === valor)?.nombre ?? valor)
+                    }
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__todos__">Todos</SelectItem>

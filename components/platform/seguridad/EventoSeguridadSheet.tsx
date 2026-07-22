@@ -33,6 +33,12 @@ const TIPO_LABELS: Record<FormValues['tipo'], string> = {
   condicion_insegura: 'Condición insegura',
 }
 
+const GRAVEDAD_LABELS: Record<FormValues['gravedad'], string> = {
+  leve: 'Leve',
+  moderada: 'Moderada',
+  grave: 'Grave',
+}
+
 export function EventoSeguridadSheet({
   tenantId,
   empresaId,
@@ -119,7 +125,7 @@ export function EventoSeguridadSheet({
             <Label htmlFor="tipo">Tipo</Label>
             <Select value={form.watch('tipo')} onValueChange={(v) => form.setValue('tipo', v as FormValues['tipo'])}>
               <SelectTrigger id="tipo" className="w-full">
-                <SelectValue />
+                <SelectValue>{(valor: FormValues['tipo']) => TIPO_LABELS[valor]}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {(Object.keys(TIPO_LABELS) as FormValues['tipo'][]).map((tipo) => (
@@ -145,12 +151,12 @@ export function EventoSeguridadSheet({
                 onValueChange={(v) => form.setValue('gravedad', v as FormValues['gravedad'])}
               >
                 <SelectTrigger id="gravedad" className="w-full">
-                  <SelectValue />
+                  <SelectValue>{(valor: FormValues['gravedad']) => GRAVEDAD_LABELS[valor]}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="leve">Leve</SelectItem>
-                  <SelectItem value="moderada">Moderada</SelectItem>
-                  <SelectItem value="grave">Grave</SelectItem>
+                  <SelectItem value="leve">{GRAVEDAD_LABELS.leve}</SelectItem>
+                  <SelectItem value="moderada">{GRAVEDAD_LABELS.moderada}</SelectItem>
+                  <SelectItem value="grave">{GRAVEDAD_LABELS.grave}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -170,7 +176,11 @@ export function EventoSeguridadSheet({
                 }}
               >
                 <SelectTrigger id="evento-sucursal" className="w-full">
-                  <SelectValue />
+                  <SelectValue>
+                    {(valor: string) =>
+                      valor === '__todas__' ? 'Sin especificar' : (sucursales.find((s) => s.id === valor)?.nombre ?? valor)
+                    }
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__todas__">Sin especificar</SelectItem>
@@ -189,7 +199,13 @@ export function EventoSeguridadSheet({
                 onValueChange={(v) => form.setValue('unidadId', v === '__todas__' ? null : v)}
               >
                 <SelectTrigger id="evento-unidad" className="w-full">
-                  <SelectValue />
+                  <SelectValue>
+                    {(valor: string) =>
+                      valor === '__todas__'
+                        ? 'Sin especificar'
+                        : (unidadesDisponibles.find((u) => u.id === valor)?.nombre ?? valor)
+                    }
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__todas__">Sin especificar</SelectItem>
@@ -210,7 +226,11 @@ export function EventoSeguridadSheet({
                 onValueChange={(v) => form.setValue('cargoId', v === '__todos__' ? null : v)}
               >
                 <SelectTrigger id="evento-cargo" className="w-full">
-                  <SelectValue />
+                  <SelectValue>
+                    {(valor: string) =>
+                      valor === '__todos__' ? 'Sin especificar' : (cargos.find((c) => c.id === valor)?.nombre ?? valor)
+                    }
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__todos__">Sin especificar</SelectItem>
@@ -229,7 +249,11 @@ export function EventoSeguridadSheet({
                 onValueChange={(v) => form.setValue('turnoId', v === '__todos__' ? null : v)}
               >
                 <SelectTrigger id="evento-turno" className="w-full">
-                  <SelectValue />
+                  <SelectValue>
+                    {(valor: string) =>
+                      valor === '__todos__' ? 'Sin especificar' : (turnos.find((t) => t.id === valor)?.nombre ?? valor)
+                    }
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__todos__">Sin especificar</SelectItem>
