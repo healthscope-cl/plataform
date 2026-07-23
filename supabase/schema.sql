@@ -712,6 +712,7 @@ create table campanas (
   costo numeric,
   participantes integer,
   resultado text,
+  pregunta_seguimiento_id text,
   estado text not null default 'planificada' check (estado in ('planificada', 'activa', 'finalizada'))
 );
 

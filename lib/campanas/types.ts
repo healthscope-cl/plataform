@@ -26,6 +26,7 @@ export type Campana = {
   costo: number | null
   participantes: number | null
   resultado: string | null
+  preguntaSeguimientoId: string | null
   estado: EstadoCampana
 }
 
@@ -44,6 +45,7 @@ export function mapCampanaRow(row: {
   costo: number | null
   participantes: number | null
   resultado: string | null
+  pregunta_seguimiento_id: string | null
   estado: string
 }): Campana {
   return {
@@ -61,6 +63,7 @@ export function mapCampanaRow(row: {
     costo: row.costo,
     participantes: row.participantes,
     resultado: row.resultado,
+    preguntaSeguimientoId: row.pregunta_seguimiento_id,
     estado: row.estado as EstadoCampana,
   }
 }
