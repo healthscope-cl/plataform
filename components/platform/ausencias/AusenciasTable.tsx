@@ -57,7 +57,7 @@ export function AusenciasTable({ episodios }: { episodios: EpisodioFila[] }) {
           <Label htmlFor="filtro-tipo" className="text-sm text-muted-foreground">
             Tipo administrativo
           </Label>
-          <Select value={tipoFiltro} onValueChange={(valor) => valor && setTipoFiltro(valor)}>
+          <Select value={tipoFiltro} onValueChange={(valor) => valor !== null && setTipoFiltro(valor)}>
             <SelectTrigger id="filtro-tipo" className="w-full">
               <SelectValue>{(valor: string) => (valor === '__todos__' ? 'Todos' : valor)}</SelectValue>
             </SelectTrigger>
@@ -75,7 +75,7 @@ export function AusenciasTable({ episodios }: { episodios: EpisodioFila[] }) {
           <Label htmlFor="filtro-estado" className="text-sm text-muted-foreground">
             Estado
           </Label>
-          <Select value={estadoFiltro} onValueChange={(valor) => valor && setEstadoFiltro(valor)}>
+          <Select value={estadoFiltro} onValueChange={(valor) => valor !== null && setEstadoFiltro(valor)}>
             <SelectTrigger id="filtro-estado" className="w-full">
               <SelectValue>
                 {(valor: string) => (valor === '__todos__' ? 'Todos' : valor === 'abierto' ? 'Abierto' : 'Cerrado')}
