@@ -731,3 +731,41 @@ create policy "campanas_update_admin" on campanas
 
 grant select, insert, update on campanas to authenticated;
 grant all on campanas to service_role;
+
+-- ============================================================
+-- PROFESSIONALS: profesionales
+-- ============================================================
+
+create table profesionales (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  empresa_id uuid not null references empresas(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  creada_por uuid not null references usuarios(id),
+  tipo text not null check (tipo in (
+    'psicologo', 'kinesiologo', 'ergonomo', 'terapeuta_ocupacional',
+    'nutricionista', 'medico_laboral', 'prevencionista', 'podologo'
+  )),
+  nombre text not null,
+  email text,
+  telefono text,
+  notas text,
+  activo boolean not null default true
+);
+
+alter table profesionales enable row level security;
+
+create policy "profesionales_select_same_tenant" on profesionales
+  for select to authenticated using (tenant_id = auth_tenant_id());
+
+create policy "profesionales_insert_admin" on profesionales
+  for insert to authenticated
+  with check (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']));
+
+create policy "profesionales_update_admin" on profesionales
+  for update to authenticated
+  using (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']))
+  with check (tenant_id = auth_tenant_id() and auth_has_role(array['superadmin', 'admin_cliente']));
+
+grant select, insert, update on profesionales to authenticated;
+grant all on profesionales to service_role;
