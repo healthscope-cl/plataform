@@ -3,6 +3,7 @@ import { isAdminRole } from '@/lib/platform/roles'
 
 const NAV_ITEMS = [
   { href: '/plataforma/resumen', label: 'Resumen', adminOnly: false },
+  { href: '/plataforma/reportes', label: 'Reportes', adminOnly: false },
   { href: '/plataforma/alertas', label: 'Alertas', adminOnly: true },
   { href: '/plataforma/encuestas', label: 'Encuestas', adminOnly: true },
   { href: '/plataforma/seguridad', label: 'Seguridad laboral', adminOnly: true },
@@ -21,7 +22,7 @@ export function Sidebar({ rolClave }: { rolClave: string }) {
   const isAdmin = isAdminRole(rolClave)
 
   return (
-    <nav className="w-60 shrink-0 border-r border-border bg-card p-4">
+    <nav className="w-60 shrink-0 border-r border-border bg-card p-4 print:hidden">
       <ul className="space-y-1">
         {NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin).map((item) => (
           <li key={item.href}>
