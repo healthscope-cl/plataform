@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { createClient } from '@/lib/supabase/client'
 import { logAudit } from '@/lib/platform/audit'
 import { mapCampanaRow, type Campana } from '@/lib/campanas/types'
+import { CATALOGO_PREGUNTAS } from '@/lib/encuestas/catalogo'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -46,6 +47,7 @@ const schema = z.strictObject({
   proveedor: z.string(),
   costo: z.string(),
   participantes: z.string(),
+  preguntaSeguimientoId: z.string(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -73,6 +75,7 @@ export function CampanaSheet({
       proveedor: '',
       costo: '',
       participantes: '',
+      preguntaSeguimientoId: '',
     },
   })
 
@@ -92,6 +95,7 @@ export function CampanaSheet({
         proveedor: values.proveedor.trim() ? values.proveedor : null,
         costo: values.costo.trim() ? Number(values.costo) : null,
         participantes: values.participantes.trim() ? Number(values.participantes) : null,
+        pregunta_seguimiento_id: values.preguntaSeguimientoId.trim() ? values.preguntaSeguimientoId : null,
       })
       .select()
       .single()
@@ -131,6 +135,29 @@ export function CampanaSheet({
                 {TIPOS.map((tipo) => (
                   <SelectItem key={tipo} value={tipo}>
                     {TIPO_LABELS[tipo]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="preguntaSeguimiento">Pregunta de seguimiento (opcional)</Label>
+            <Select
+              value={form.watch('preguntaSeguimientoId') || '__ninguna__'}
+              onValueChange={(v) => v !== null && form.setValue('preguntaSeguimientoId', v === '__ninguna__' ? '' : v)}
+            >
+              <SelectTrigger id="preguntaSeguimiento" className="w-full">
+                <SelectValue>
+                  {(valor: string) =>
+                    valor === '__ninguna__' ? 'Ninguna' : (CATALOGO_PREGUNTAS.find((p) => p.id === valor)?.texto ?? valor)
+                  }
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__ninguna__">Ninguna</SelectItem>
+                {CATALOGO_PREGUNTAS.map((pregunta) => (
+                  <SelectItem key={pregunta.id} value={pregunta.id}>
+                    {pregunta.texto}
                   </SelectItem>
                 ))}
               </SelectContent>
