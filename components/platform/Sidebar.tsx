@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { href: '/plataforma/organizacion', label: 'Organización', adminOnly: true },
   { href: '/plataforma/importar', label: 'Importar datos', adminOnly: true },
   { href: '/plataforma/importar/historial', label: 'Historial de importaciones', adminOnly: true },
+  { href: '/plataforma/calidad-datos', label: 'Calidad de datos', adminOnly: true },
   { href: '/plataforma/usuarios', label: 'Usuarios y permisos', adminOnly: true },
   { href: '/plataforma/auditoria', label: 'Auditoría', adminOnly: true },
 ] as const
