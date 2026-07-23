@@ -9,4 +9,5 @@ export const CATALOGO_PREGUNTAS: PreguntaCatalogo[] = [
   { id: 'liderazgo', texto: 'Percepción de apoyo de la jefatura directa' },
   { id: 'conciliacion', texto: 'Equilibrio entre trabajo y vida personal' },
   { id: 'pausas_activas', texto: 'Cumplimiento de pausas activas durante la jornada' },
+  { id: 'clima', texto: 'Percepción del clima laboral en el equipo' },
 ]
