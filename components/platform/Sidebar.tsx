@@ -3,6 +3,7 @@ import { isAdminRole } from '@/lib/platform/roles'
 
 const NAV_ITEMS = [
   { href: '/plataforma/resumen', label: 'Resumen', adminOnly: false },
+  { href: '/plataforma/ausencias', label: 'Ausencias y licencias', adminOnly: true },
   { href: '/plataforma/reportes', label: 'Reportes', adminOnly: false },
   { href: '/plataforma/alertas', label: 'Alertas', adminOnly: true },
   { href: '/plataforma/encuestas', label: 'Encuestas', adminOnly: true },
