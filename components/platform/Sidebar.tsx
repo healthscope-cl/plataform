@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { href: '/plataforma/ergonomia', label: 'Ergonomía', adminOnly: true },
   { href: '/plataforma/intervenciones', label: 'Intervenciones', adminOnly: true },
   { href: '/plataforma/campanas', label: 'Campañas', adminOnly: true },
+  { href: '/plataforma/profesionales', label: 'Profesionales', adminOnly: true },
   { href: '/plataforma/organizacion', label: 'Organización', adminOnly: true },
   { href: '/plataforma/importar', label: 'Importar datos', adminOnly: true },
   { href: '/plataforma/importar/historial', label: 'Historial de importaciones', adminOnly: true },
