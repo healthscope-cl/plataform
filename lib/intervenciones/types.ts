@@ -13,6 +13,7 @@ export type Intervencion = {
   fecha: string
   indicadores: string
   resultado: string | null
+  preguntaSeguimientoId: string | null
   estado: EstadoIntervencion
 }
 
@@ -29,6 +30,7 @@ export function mapIntervencionRow(row: {
   fecha: string
   indicadores: string
   resultado: string | null
+  pregunta_seguimiento_id: string | null
   estado: string
 }): Intervencion {
   return {
@@ -44,6 +46,7 @@ export function mapIntervencionRow(row: {
     fecha: row.fecha,
     indicadores: row.indicadores,
     resultado: row.resultado,
+    preguntaSeguimientoId: row.pregunta_seguimiento_id,
     estado: row.estado as EstadoIntervencion,
   }
 }

@@ -670,6 +670,7 @@ create table intervenciones (
   fecha date not null,
   indicadores text not null,
   resultado text,
+  pregunta_seguimiento_id text,
   estado text not null default 'planificada' check (estado in ('planificada', 'en_ejecucion', 'completada'))
 );
 
