@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { mapEmpresaRow } from '@/lib/platform/types'
+import { mapEmpresaRow, mapRolRow } from '@/lib/platform/types'
+import { isAdminRole } from '@/lib/platform/roles'
 import { calcularIndiceSuficiencia } from '@/lib/suficiencia/calcular'
 import { SuficienciaBanner } from '@/components/platform/dashboard/SuficienciaBanner'
 import { computeIndicadores } from '@/lib/indicators/aggregate'
@@ -22,8 +23,12 @@ export default async function ReporteRecursosHumanosPage() {
   } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: usuarioRow } = await supabase.from('usuarios').select('id').eq('id', user.id).single()
+  const { data: usuarioRow } = await supabase.from('usuarios').select('*, roles(*)').eq('id', user.id).single()
   if (!usuarioRow) redirect('/login')
+  const rol = mapRolRow(usuarioRow.roles)
+  if (!isAdminRole(rol.clave)) {
+    return <p className="text-muted-foreground">Este reporte requiere permisos de administrador.</p>
+  }
 
   const { data: empresaRows } = await supabase.from('empresas').select('*').limit(1)
   const empresaRow = empresaRows?.[0]
