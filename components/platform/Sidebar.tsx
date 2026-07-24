@@ -6,6 +6,7 @@ const NAV_ITEMS = [
   { href: '/plataforma/ausencias', label: 'Ausencias y licencias', adminOnly: true },
   { href: '/plataforma/reportes', label: 'Reportes', adminOnly: false },
   { href: '/plataforma/alertas', label: 'Alertas', adminOnly: true },
+  { href: '/plataforma/recomendaciones', label: 'Recomendaciones', adminOnly: true },
   { href: '/plataforma/encuestas', label: 'Encuestas', adminOnly: true },
   { href: '/plataforma/bienestar', label: 'Bienestar preventivo', adminOnly: true },
   { href: '/plataforma/seguridad', label: 'Seguridad laboral', adminOnly: true },
