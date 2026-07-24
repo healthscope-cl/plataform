@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { mapEmpresaRow } from '@/lib/platform/types'
+import { getEmpresaActiva } from '@/lib/platform/empresa-activa'
 import { mapEventoSeguridadRow } from '@/lib/seguridad/types'
 import { mapEvaluacionErgonomicaRow } from '@/lib/ergonomia/types'
 import { mapCampanaRow, type Campana } from '@/lib/campanas/types'
@@ -29,12 +29,10 @@ export default async function ReportePrevencionPage() {
   const { data: usuarioRow } = await supabase.from('usuarios').select('id').eq('id', user.id).single()
   if (!usuarioRow) redirect('/login')
 
-  const { data: empresaRows } = await supabase.from('empresas').select('*').limit(1)
-  const empresaRow = empresaRows?.[0]
-  if (!empresaRow) {
+  const empresa = await getEmpresaActiva(supabase)
+  if (!empresa) {
     return <p className="text-muted-foreground">Esta cuenta todavía no tiene una empresa configurada.</p>
   }
-  const empresa = mapEmpresaRow(empresaRow)
 
   const { data: eventoRows } = await supabase.from('eventos_seguridad').select('*').eq('empresa_id', empresa.id)
   const eventos = (eventoRows ?? []).map(mapEventoSeguridadRow)

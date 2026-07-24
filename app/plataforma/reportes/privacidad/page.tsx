@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { mapEmpresaRow } from '@/lib/platform/types'
+import { getEmpresaActiva } from '@/lib/platform/empresa-activa'
 import { computeIndicadores } from '@/lib/indicators/aggregate'
 import { MIN_GROUP_SIZE } from '@/lib/indicators/formulas'
 
@@ -22,12 +22,10 @@ export default async function ReportePrivacidadPage() {
   const { data: usuarioRow } = await supabase.from('usuarios').select('id').eq('id', user.id).single()
   if (!usuarioRow) redirect('/login')
 
-  const { data: empresaRows } = await supabase.from('empresas').select('*').limit(1)
-  const empresaRow = empresaRows?.[0]
-  if (!empresaRow) {
+  const empresa = await getEmpresaActiva(supabase)
+  if (!empresa) {
     return <p className="text-muted-foreground">Esta cuenta todavía no tiene una empresa configurada.</p>
   }
-  const empresa = mapEmpresaRow(empresaRow)
 
   const periodoInicioDate = new Date()
   periodoInicioDate.setMonth(periodoInicioDate.getMonth() - 6)

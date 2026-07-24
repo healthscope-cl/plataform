@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { mapEmpresaRow, mapRolRow } from '@/lib/platform/types'
+import { mapRolRow } from '@/lib/platform/types'
+import { getEmpresaActiva } from '@/lib/platform/empresa-activa'
 import { isAdminRole } from '@/lib/platform/roles'
 import { mapCampanaRow, type Campana } from '@/lib/campanas/types'
 import { mapEncuestaRespuestaRow } from '@/lib/encuestas/types'
@@ -49,12 +50,10 @@ export default async function ReporteCampanasPage() {
     return <p className="text-muted-foreground">Este reporte requiere permisos de administrador.</p>
   }
 
-  const { data: empresaRows } = await supabase.from('empresas').select('*').limit(1)
-  const empresaRow = empresaRows?.[0]
-  if (!empresaRow) {
+  const empresa = await getEmpresaActiva(supabase)
+  if (!empresa) {
     return <p className="text-muted-foreground">Esta cuenta todavía no tiene una empresa configurada.</p>
   }
-  const empresa = mapEmpresaRow(empresaRow)
 
   const { data: campanaRows } = await supabase.from('campanas').select('*').eq('empresa_id', empresa.id)
   const campanas = (campanaRows ?? []).map(mapCampanaRow)
