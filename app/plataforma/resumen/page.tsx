@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { mapUsuarioRow, mapRolRow } from '@/lib/platform/types'
+import { getEmpresaActiva } from '@/lib/platform/empresa-activa'
 import { mapLineaBaseRow } from '@/lib/indicators/types'
 import type { IndicadorResultados } from '@/lib/indicators/aggregate'
 import type { IndicadorValor } from '@/lib/indicators/formulas'
@@ -60,11 +61,11 @@ export default async function ResumenPage() {
   const usuario = mapUsuarioRow(usuarioRow)
   const rol = mapRolRow(usuarioRow.roles)
 
-  const { data: empresas } = await supabase.from('empresas').select('id').limit(1)
-  const empresaId = empresas?.[0]?.id
-  if (!empresaId) {
+  const empresa = await getEmpresaActiva(supabase)
+  if (!empresa) {
     return <p className="text-muted-foreground">Esta cuenta todavía no tiene una empresa configurada.</p>
   }
+  const empresaId = empresa.id
 
   const periodoFin = new Date().toISOString().slice(0, 10)
   const periodoInicioDate = new Date()

@@ -10,7 +10,6 @@ import { QualityErrorsTable } from '@/components/platform/import/QualityErrorsTa
 import { ImportPreviewTable } from '@/components/platform/import/ImportPreviewTable'
 import { ImportSummary } from '@/components/platform/import/ImportSummary'
 import { Button } from '@/components/ui/button'
-import { createClient } from '@/lib/supabase/client'
 
 type WizardStep = 'subir' | 'mapear' | 'validar' | 'confirmar' | 'resumen'
 
@@ -88,10 +87,6 @@ export default function ImportarPage() {
     setEjecutando(true)
     setArchivoRepetidoAviso(null)
 
-    const supabase = createClient()
-    const { data: empresas } = await supabase.from('empresas').select('id').limit(1)
-    const empresaId = empresas?.[0]?.id
-
     const buffer = await file.arrayBuffer()
     const hashBuffer = await crypto.subtle.digest('SHA-256', buffer)
     const archivoHash = Array.from(new Uint8Array(hashBuffer))
@@ -104,7 +99,6 @@ export default function ImportarPage() {
       body: JSON.stringify({
         archivoNombre: file.name,
         archivoHash,
-        empresaId,
         forzarReimportacion,
         rows: mappedRows.filter((_, index) => !excludedRows.has(index)),
       }),

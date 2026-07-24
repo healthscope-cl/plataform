@@ -7,6 +7,7 @@ import { hashRut } from '@/lib/ingestion/rutHash'
 import { validateRows, type MappedRow } from '@/lib/ingestion/validate'
 import type { TipoAdministrativoClave } from '@/lib/ingestion/types'
 import { resolveIdPorNombre, resolveUnidadId } from '@/lib/ingestion/groupMatching'
+import { getEmpresaActiva } from '@/lib/platform/empresa-activa'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -34,7 +35,6 @@ export async function POST(request: Request) {
   const body = (await request.json()) as {
     archivoNombre: string
     archivoHash: string
-    empresaId: string
     forzarReimportacion?: boolean
     rows: Array<
       MappedRow & {
@@ -47,18 +47,13 @@ export async function POST(request: Request) {
     >
   }
 
-  const admin = createAdminClient()
-
-  const { data: empresaValida } = await admin
-    .from('empresas')
-    .select('id')
-    .eq('id', body.empresaId)
-    .eq('tenant_id', tenantId)
-    .maybeSingle()
-
-  if (!empresaValida) {
-    return NextResponse.json({ error: 'Empresa no encontrada para este tenant.' }, { status: 400 })
+  const empresaActiva = await getEmpresaActiva(supabase)
+  if (!empresaActiva) {
+    return NextResponse.json({ error: 'Esta cuenta todavía no tiene una empresa configurada.' }, { status: 400 })
   }
+  const empresaId = empresaActiva.id
+
+  const admin = createAdminClient()
 
   const { data: archivoRepetido } = await admin
     .from('importaciones')
@@ -105,7 +100,7 @@ export async function POST(request: Request) {
     .from('sucursales')
     .select('id, nombre')
     .eq('tenant_id', tenantId)
-    .eq('empresa_id', body.empresaId)
+    .eq('empresa_id', empresaId)
   const sucursales = (sucursalRows ?? []).map((row) => ({ id: row.id as string, nombre: row.nombre as string }))
   const sucursalIds = sucursales.map((s) => s.id)
 
@@ -127,14 +122,14 @@ export async function POST(request: Request) {
     .from('cargos')
     .select('id, nombre')
     .eq('tenant_id', tenantId)
-    .eq('empresa_id', body.empresaId)
+    .eq('empresa_id', empresaId)
   const cargos = (cargoRows ?? []).map((row) => ({ id: row.id as string, nombre: row.nombre as string }))
 
   const { data: turnoRows } = await admin
     .from('turnos')
     .select('id, nombre')
     .eq('tenant_id', tenantId)
-    .eq('empresa_id', body.empresaId)
+    .eq('empresa_id', empresaId)
   const turnos = (turnoRows ?? []).map((row) => ({ id: row.id as string, nombre: row.nombre as string }))
 
   const advertenciasGrupo: Array<{
@@ -230,7 +225,7 @@ export async function POST(request: Request) {
         .from('personas')
         .insert({
           tenant_id: tenantId,
-          empresa_id: body.empresaId,
+          empresa_id: empresaId,
           codigo: row.codigoPersona ?? rutHash.slice(0, 8),
           rut_hash: rutHash,
           unidad_id: unidadId,
