@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import type { Empresa } from '@/lib/platform/types'
 import {
   Select,
@@ -9,7 +10,15 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
-export function EmpresaSwitcher({ empresas }: { empresas: Empresa[] }) {
+export function EmpresaSwitcher({
+  empresas,
+  empresaActivaId,
+}: {
+  empresas: Empresa[]
+  empresaActivaId: string
+}) {
+  const router = useRouter()
+
   if (empresas.length <= 1) {
     return (
       <span className="text-sm font-medium text-foreground">
@@ -18,8 +27,18 @@ export function EmpresaSwitcher({ empresas }: { empresas: Empresa[] }) {
     )
   }
 
+  async function handleChange(empresaId: string | null) {
+    if (empresaId === null) return
+    await fetch('/api/platform/empresa-activa', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ empresaId }),
+    })
+    router.refresh()
+  }
+
   return (
-    <Select defaultValue={empresas[0].id}>
+    <Select value={empresaActivaId} onValueChange={handleChange}>
       <SelectTrigger className="w-48">
         <SelectValue>{(id: string) => empresas.find((empresa) => empresa.id === id)?.nombre ?? id}</SelectValue>
       </SelectTrigger>

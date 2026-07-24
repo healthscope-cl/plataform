@@ -10,10 +10,12 @@ export function Topbar({
   usuario,
   rol,
   empresas,
+  empresaActivaId,
 }: {
   usuario: Usuario
   rol: Rol
   empresas: Empresa[]
+  empresaActivaId: string
 }) {
   const router = useRouter()
 
@@ -26,7 +28,7 @@ export function Topbar({
 
   return (
     <header className="flex items-center justify-between border-b border-border bg-background px-6 py-3 print:hidden">
-      <EmpresaSwitcher empresas={empresas} />
+      <EmpresaSwitcher empresas={empresas} empresaActivaId={empresaActivaId} />
       <div className="flex items-center gap-4">
         <div className="text-right">
           <p className="text-sm font-medium text-foreground">{usuario.nombre}</p>

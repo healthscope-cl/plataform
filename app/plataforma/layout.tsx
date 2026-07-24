@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { mapEmpresaRow, mapUsuarioRow, mapRolRow } from '@/lib/platform/types'
+import { getEmpresaActiva } from '@/lib/platform/empresa-activa'
 import { Sidebar } from '@/components/platform/Sidebar'
 import { Topbar } from '@/components/platform/Topbar'
 
@@ -33,12 +34,13 @@ export default async function PlataformaLayout({
 
   const { data: empresaRows } = await supabase.from('empresas').select('*')
   const empresas = (empresaRows ?? []).map(mapEmpresaRow)
+  const empresaActiva = await getEmpresaActiva(supabase)
 
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar rolClave={rol.clave} />
       <div className="flex flex-1 flex-col">
-        <Topbar usuario={usuario} rol={rol} empresas={empresas} />
+        <Topbar usuario={usuario} rol={rol} empresas={empresas} empresaActivaId={empresaActiva?.id ?? ''} />
         <main className="flex-1 p-6">{children}</main>
       </div>
     </div>
