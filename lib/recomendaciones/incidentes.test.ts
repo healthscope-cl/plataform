@@ -20,16 +20,34 @@ describe('huboIncrementoIncidentes', () => {
     expect(resultado).toEqual({ actual: 1, anterior: 3, incremento: false })
   })
 
-  it('una fecha exactamente en el límite entre los dos períodos cuenta como "actual", no "anterior"', () => {
-    const fechas = ['2026-04-24']
+  it('una fecha exactamente en el límite de inicio del período "actual" cuenta como "actual"', () => {
+    const fechas = ['2026-04-25']
     const resultado = huboIncrementoIncidentes({ fechas, fechaCorte: '2026-07-24' })
     expect(resultado).toEqual({ actual: 1, anterior: 0, incremento: true })
   })
 
-  it('una fecha anterior a la ventana "anterior" no cuenta en ningún período', () => {
+  it('una fecha exactamente en el límite de inicio del período "anterior" cuenta como "anterior"', () => {
+    const fechas = ['2026-01-25']
+    const resultado = huboIncrementoIncidentes({ fechas, fechaCorte: '2026-07-24' })
+    expect(resultado).toEqual({ actual: 0, anterior: 1, incremento: false })
+  })
+
+  it('una fecha un día antes del límite del período "anterior" no cuenta en ningún período', () => {
+    const fechas = ['2026-01-24']
+    const resultado = huboIncrementoIncidentes({ fechas, fechaCorte: '2026-07-24' })
+    expect(resultado).toEqual({ actual: 0, anterior: 0, incremento: false })
+  })
+
+  it('una fecha muy anterior a la ventana "anterior" no cuenta en ningún período', () => {
     const fechas = ['2025-01-01']
     const resultado = huboIncrementoIncidentes({ fechas, fechaCorte: '2026-07-24' })
     expect(resultado).toEqual({ actual: 0, anterior: 0, incremento: false })
+  })
+
+  it('maneja correctamente un corte a fin de mes sin desbordar de mes (no usa setMonth)', () => {
+    const fechas = ['2026-03-15']
+    const resultado = huboIncrementoIncidentes({ fechas, fechaCorte: '2026-05-31' })
+    expect(resultado).toEqual({ actual: 1, anterior: 0, incremento: true })
   })
 
   it('devuelve ceros y sin incremento cuando no hay fechas', () => {
