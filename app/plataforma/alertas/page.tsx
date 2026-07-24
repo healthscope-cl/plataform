@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { mapUsuarioRow, mapRolRow } from '@/lib/platform/types'
+import { getEmpresaActiva } from '@/lib/platform/empresa-activa'
 import { mapReglaAlertaRow } from '@/lib/alertas/types'
 import { ReglasAlertaTable } from '@/components/platform/alertas/ReglasAlertaTable'
 
@@ -16,11 +17,11 @@ export default async function AlertasPage() {
   const usuario = mapUsuarioRow(usuarioRow)
   const rol = mapRolRow(usuarioRow.roles)
 
-  const { data: empresas } = await supabase.from('empresas').select('id').limit(1)
-  const empresaId = empresas?.[0]?.id
-  if (!empresaId) {
+  const empresa = await getEmpresaActiva(supabase)
+  if (!empresa) {
     return <p className="text-muted-foreground">Esta cuenta todavía no tiene una empresa configurada.</p>
   }
+  const empresaId = empresa.id
 
   const { data: reglaRows } = await supabase
     .from('reglas_alerta')
