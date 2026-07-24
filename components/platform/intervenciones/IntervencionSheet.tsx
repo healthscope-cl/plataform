@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { CATALOGO_PREGUNTAS } from '@/lib/encuestas/catalogo'
 
 const schema = z.strictObject({
   problema: z.string().min(1, 'Requerido'),
@@ -19,6 +21,7 @@ const schema = z.strictObject({
   presupuesto: z.string(),
   fecha: z.string().min(1, 'Requerido'),
   indicadores: z.string().min(1, 'Requerido'),
+  preguntaSeguimientoId: z.string(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -44,6 +47,7 @@ export function IntervencionSheet({
       presupuesto: '',
       fecha: new Date().toISOString().slice(0, 10),
       indicadores: '',
+      preguntaSeguimientoId: '',
     },
   })
 
@@ -62,6 +66,7 @@ export function IntervencionSheet({
         presupuesto,
         fecha: values.fecha,
         indicadores: values.indicadores,
+        pregunta_seguimiento_id: values.preguntaSeguimientoId.trim() ? values.preguntaSeguimientoId : null,
       })
       .select()
       .single()
@@ -138,6 +143,29 @@ export function IntervencionSheet({
                 <p className="text-sm text-destructive">{form.formState.errors.indicadores.message}</p>
               ) : null}
             </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="preguntaSeguimiento">Pregunta de seguimiento (opcional)</Label>
+            <Select
+              value={form.watch('preguntaSeguimientoId') || '__ninguna__'}
+              onValueChange={(v) => v !== null && form.setValue('preguntaSeguimientoId', v === '__ninguna__' ? '' : v)}
+            >
+              <SelectTrigger id="preguntaSeguimiento" className="w-full">
+                <SelectValue>
+                  {(valor: string) =>
+                    valor === '__ninguna__' ? 'Ninguna' : (CATALOGO_PREGUNTAS.find((p) => p.id === valor)?.texto ?? valor)
+                  }
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__ninguna__">Ninguna</SelectItem>
+                {CATALOGO_PREGUNTAS.map((pregunta) => (
+                  <SelectItem key={pregunta.id} value={pregunta.id}>
+                    {pregunta.texto}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <Button type="submit">Guardar</Button>
         </form>

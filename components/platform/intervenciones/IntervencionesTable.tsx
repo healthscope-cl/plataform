@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { isAdminRole } from '@/lib/platform/roles'
 import type { Intervencion } from '@/lib/intervenciones/types'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { IntervencionSheet } from './IntervencionSheet'
 import { GestionarIntervencionSheet } from './GestionarIntervencionSheet'
 
@@ -66,7 +68,12 @@ export function IntervencionesTable({
                 <Badge variant="outline">{ESTADO_LABEL[intervencion.estado]}</Badge>
               </TableCell>
               {canEdit ? (
-                <TableCell className="text-right">
+                <TableCell className="flex justify-end gap-2">
+                  <Link href={`/plataforma/intervenciones/${intervencion.id}`}>
+                    <Button type="button" variant="outline" size="sm">
+                      Ver seguimiento
+                    </Button>
+                  </Link>
                   <GestionarIntervencionSheet
                     tenantId={tenantId}
                     actorId={actorId}
