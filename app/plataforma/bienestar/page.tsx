@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { mapEmpresaRow } from '@/lib/platform/types'
+import { getEmpresaActiva } from '@/lib/platform/empresa-activa'
 import { mapEncuestaRespuestaRow } from '@/lib/encuestas/types'
 import { agregarRespuestas } from '@/lib/encuestas/agregar'
 import { CATALOGO_PREGUNTAS } from '@/lib/encuestas/catalogo'
@@ -18,12 +18,10 @@ export default async function BienestarPreventivoPage() {
   const { data: usuarioRow } = await supabase.from('usuarios').select('id').eq('id', user.id).single()
   if (!usuarioRow) redirect('/login')
 
-  const { data: empresaRows } = await supabase.from('empresas').select('*').limit(1)
-  const empresaRow = empresaRows?.[0]
-  if (!empresaRow) {
+  const empresa = await getEmpresaActiva(supabase)
+  if (!empresa) {
     return <p className="text-muted-foreground">Esta cuenta todavía no tiene una empresa configurada.</p>
   }
-  const empresa = mapEmpresaRow(empresaRow)
 
   const { data: encuestaRows } = await supabase.from('encuestas').select('id').eq('empresa_id', empresa.id)
   const encuestaIds = (encuestaRows ?? []).map((row) => row.id as string)

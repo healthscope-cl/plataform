@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { mapUsuarioRow, mapRolRow, mapEmpresaRow } from '@/lib/platform/types'
+import { mapUsuarioRow, mapRolRow } from '@/lib/platform/types'
+import { getEmpresaActiva } from '@/lib/platform/empresa-activa'
 import { computeIndicadores } from '@/lib/indicators/aggregate'
 import { calcularIndiceSuficiencia } from '@/lib/suficiencia/calcular'
 import { SuficienciaBanner } from '@/components/platform/dashboard/SuficienciaBanner'
@@ -43,12 +44,10 @@ export default async function ReportesPage() {
   const usuario = mapUsuarioRow(usuarioRow)
   const rol = mapRolRow(usuarioRow.roles)
 
-  const { data: empresaRows } = await supabase.from('empresas').select('*').limit(1)
-  const empresaRow = empresaRows?.[0]
-  if (!empresaRow) {
+  const empresa = await getEmpresaActiva(supabase)
+  if (!empresa) {
     return <p className="text-muted-foreground">Esta cuenta todavía no tiene una empresa configurada.</p>
   }
-  const empresa = mapEmpresaRow(empresaRow)
   const empresaId = empresa.id
 
   const periodoFin = new Date().toISOString().slice(0, 10)

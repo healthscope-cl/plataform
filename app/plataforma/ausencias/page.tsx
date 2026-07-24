@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { mapEmpresaRow } from '@/lib/platform/types'
+import { getEmpresaActiva } from '@/lib/platform/empresa-activa'
 import { mapEpisodioRow } from '@/lib/ingestion/types'
 import { AusenciasTable, type EpisodioFila } from '@/components/platform/ausencias/AusenciasTable'
 
@@ -14,12 +14,10 @@ export default async function AusenciasPage() {
   const { data: usuarioRow } = await supabase.from('usuarios').select('id').eq('id', user.id).single()
   if (!usuarioRow) redirect('/login')
 
-  const { data: empresaRows } = await supabase.from('empresas').select('*').limit(1)
-  const empresaRow = empresaRows?.[0]
-  if (!empresaRow) {
+  const empresa = await getEmpresaActiva(supabase)
+  if (!empresa) {
     return <p className="text-muted-foreground">Esta cuenta todavía no tiene una empresa configurada.</p>
   }
-  const empresa = mapEmpresaRow(empresaRow)
 
   const { data: personaRows } = await supabase.from('personas').select('id, codigo').eq('empresa_id', empresa.id)
   const personas = (personaRows ?? []).map((row) => ({ id: row.id as string, codigo: row.codigo as string }))

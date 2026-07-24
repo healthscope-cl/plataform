@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { mapEmpresaRow } from '@/lib/platform/types'
+import { getEmpresaActiva } from '@/lib/platform/empresa-activa'
 import { calcularIndiceSuficiencia } from '@/lib/suficiencia/calcular'
 import { SuficienciaBanner } from '@/components/platform/dashboard/SuficienciaBanner'
 import { computeIndicadores } from '@/lib/indicators/aggregate'
@@ -26,12 +26,10 @@ export default async function ReporteGerenciaPage() {
   const { data: usuarioRow } = await supabase.from('usuarios').select('id').eq('id', user.id).single()
   if (!usuarioRow) redirect('/login')
 
-  const { data: empresaRows } = await supabase.from('empresas').select('*').limit(1)
-  const empresaRow = empresaRows?.[0]
-  if (!empresaRow) {
+  const empresa = await getEmpresaActiva(supabase)
+  if (!empresa) {
     return <p className="text-muted-foreground">Esta cuenta todavía no tiene una empresa configurada.</p>
   }
-  const empresa = mapEmpresaRow(empresaRow)
 
   const periodoFin = new Date().toISOString().slice(0, 10)
   const periodoInicioDate = new Date()
