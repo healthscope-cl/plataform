@@ -1,5 +1,6 @@
 import type { IndicadorValor } from '@/lib/indicators/formulas'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { IndicadorMiniChart } from './IndicadorMiniChart'
 
 function formatValor(valor: number, sufijo: string) {
   return sufijo === '$' ? `$${valor.toLocaleString('es-CL')}` : `${valor.toFixed(1)}${sufijo}`
@@ -35,6 +36,7 @@ export function IndicadorCard({
   etiquetaNumerador,
   etiquetaDenominador,
   cambio,
+  valorBase,
 }: {
   titulo: string
   resultado: IndicadorValor
@@ -42,6 +44,7 @@ export function IndicadorCard({
   etiquetaNumerador: string
   etiquetaDenominador: string
   cambio?: IndicadorValor | null
+  valorBase?: number | null
 }) {
   return (
     <div className="rounded-2xl border border-border bg-card p-5">
@@ -74,6 +77,7 @@ export function IndicadorCard({
             </TooltipContent>
           </Tooltip>
           {cambio ? <DeltaBadge cambio={cambio} /> : null}
+          <IndicadorMiniChart actual={resultado.valor} base={valorBase ?? null} />
         </>
       )}
     </div>

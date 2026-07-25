@@ -97,6 +97,11 @@ export function ResumenInteractivo({
     return 'suprimido' in resultado ? null : resultado.valor
   }
 
+  function valorBaseDe(clave: keyof IndicadorResultados): number | null {
+    if (hayFiltroActivo || !indicadoresBase) return null
+    return valorNumerico(indicadoresBase[clave])
+  }
+
   function cambioDe(clave: keyof IndicadorResultados): IndicadorValor | null {
     if (hayFiltroActivo || !indicadoresBase) return null
     return cambio({
@@ -254,6 +259,7 @@ export function ResumenInteractivo({
           etiquetaNumerador="Días perdidos"
           etiquetaDenominador="Días programados"
           cambio={cambioDe('tasaAusentismo')}
+          valorBase={valorBaseDe('tasaAusentismo')}
         />
         <IndicadorCard
           titulo="Frecuencia"
@@ -262,6 +268,7 @@ export function ResumenInteractivo({
           etiquetaNumerador="Episodios"
           etiquetaDenominador="Dotación promedio"
           cambio={cambioDe('frecuencia')}
+          valorBase={valorBaseDe('frecuencia')}
         />
         <IndicadorCard
           titulo="Severidad"
@@ -270,6 +277,7 @@ export function ResumenInteractivo({
           etiquetaNumerador="Días perdidos"
           etiquetaDenominador="Episodios"
           cambio={cambioDe('severidad')}
+          valorBase={valorBaseDe('severidad')}
         />
         <IndicadorCard
           titulo="Duración promedio"
@@ -278,6 +286,7 @@ export function ResumenInteractivo({
           etiquetaNumerador="Días perdidos"
           etiquetaDenominador="Episodios cerrados"
           cambio={cambioDe('duracionPromedio')}
+          valorBase={valorBaseDe('duracionPromedio')}
         />
         <IndicadorCard
           titulo="Reincidencia"
@@ -286,6 +295,7 @@ export function ResumenInteractivo({
           etiquetaNumerador="Personas con 2+ episodios"
           etiquetaDenominador="Personas con 1+ episodio"
           cambio={cambioDe('reincidencia')}
+          valorBase={valorBaseDe('reincidencia')}
         />
         <IndicadorCard
           titulo="Costo estimado"
@@ -294,6 +304,7 @@ export function ResumenInteractivo({
           etiquetaNumerador="Costo total"
           etiquetaDenominador="—"
           cambio={cambioDe('costoEstimado')}
+          valorBase={valorBaseDe('costoEstimado')}
         />
       </div>
 
