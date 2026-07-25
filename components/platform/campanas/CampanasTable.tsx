@@ -28,6 +28,12 @@ const ESTADO_LABEL: Record<Campana['estado'], string> = {
   finalizada: 'Finalizada',
 }
 
+const ESTADO_CLASSNAME: Record<Campana['estado'], string> = {
+  planificada: 'border-border text-muted-foreground',
+  activa: 'border-transparent bg-success/10 text-success',
+  finalizada: 'border-transparent bg-secondary text-secondary-foreground',
+}
+
 export function CampanasTable({
   tenantId,
   empresaId,
@@ -75,7 +81,9 @@ export function CampanasTable({
               <TableCell>{campana.nombre}</TableCell>
               <TableCell>{campana.fechaInicio}</TableCell>
               <TableCell>
-                <Badge variant="outline">{ESTADO_LABEL[campana.estado]}</Badge>
+                <Badge variant="outline" className={ESTADO_CLASSNAME[campana.estado]}>
+                  {ESTADO_LABEL[campana.estado]}
+                </Badge>
               </TableCell>
               {canEdit ? (
                 <TableCell className="flex justify-end gap-2">

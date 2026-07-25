@@ -11,8 +11,15 @@ const chartConfig = {
 export function IndicadorMiniChart({ actual, base }: { actual: number; base: number | null }) {
   // Nothing to compare without a saved línea base — a single solid bar reads as a
   // generic progress bar, not a chart, and adds no information beyond the number
-  // already shown above it. Only render once there's a real actual-vs-base comparison.
-  if (base === null) return null
+  // already shown above it. Show a real empty state instead of nothing, so the
+  // card doesn't silently look unfinished before a baseline exists.
+  if (base === null) {
+    return (
+      <div className="mt-3 flex h-[76px] w-full items-center justify-center rounded-lg border border-dashed border-border px-3 text-center">
+        <p className="text-xs text-muted-foreground">Guarda una línea base para ver la comparación</p>
+      </div>
+    )
+  }
 
   const data = [{ nombre: 'valor', actual, base }]
 

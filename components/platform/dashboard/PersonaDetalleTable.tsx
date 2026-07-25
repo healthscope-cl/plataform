@@ -63,12 +63,17 @@ export function PersonaDetalleTable({
       <div className="mt-3">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Código</TableHead>
+            <TableRow className="bg-muted/40 hover:bg-muted/40">
+              <TableHead className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                Código
+              </TableHead>
               {COLUMNAS.map((columna) => {
                 const direccion = columna.clave === columnaOrden ? (ascendente ? 'ascending' : 'descending') : 'none'
                 return (
-                  <TableHead key={columna.clave} className="text-right">
+                  <TableHead
+                    key={columna.clave}
+                    className="text-right text-xs font-semibold tracking-wide text-muted-foreground uppercase"
+                  >
                     <button
                       type="button"
                       className="inline-flex items-center gap-1 rounded underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
@@ -86,10 +91,12 @@ export function PersonaDetalleTable({
           <TableBody>
             {personasOrdenadas.map((persona, indice) => (
               <TableRow key={persona.id} className={indice % 2 === 1 ? 'bg-muted/30' : undefined}>
-                <TableCell className="text-foreground">{persona.codigo}</TableCell>
+                <TableCell className="font-medium text-foreground">{persona.codigo}</TableCell>
                 <TableCell className="text-right text-foreground tabular-nums">{persona.diasPerdidos}</TableCell>
                 <TableCell className="text-right text-foreground tabular-nums">{persona.cantidadEpisodios}</TableCell>
-                <TableCell className="text-right text-foreground tabular-nums">{formatCosto(persona.costoEstimado)}</TableCell>
+                <TableCell className="text-right font-semibold text-foreground tabular-nums">
+                  {formatCosto(persona.costoEstimado)}
+                </TableCell>
               </TableRow>
             ))}
             {personasOrdenadas.length === 0 ? (

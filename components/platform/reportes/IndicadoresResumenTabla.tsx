@@ -1,40 +1,58 @@
+import { CalendarX, Activity, TrendingDown, Clock, Repeat2, Wallet } from 'lucide-react'
 import type { IndicadorResultados } from '@/lib/indicators/aggregate'
-import type { IndicadorValor } from '@/lib/indicators/formulas'
-
-const FILAS: Array<{ clave: keyof IndicadorResultados; etiqueta: string; sufijo: string; prefijo?: boolean }> = [
-  { clave: 'tasaAusentismo', etiqueta: 'Tasa de ausentismo', sufijo: '%' },
-  { clave: 'frecuencia', etiqueta: 'Frecuencia', sufijo: '%' },
-  { clave: 'severidad', etiqueta: 'Severidad', sufijo: ' días/episodio' },
-  { clave: 'duracionPromedio', etiqueta: 'Duración promedio', sufijo: ' días' },
-  { clave: 'reincidencia', etiqueta: 'Reincidencia', sufijo: '%' },
-  { clave: 'costoEstimado', etiqueta: 'Costo estimado', sufijo: '', prefijo: true },
-]
-
-function formatearValor(resultado: IndicadorValor, prefijo?: boolean, sufijo?: string): string {
-  if ('suprimido' in resultado) return 'Grupo insuficiente para mostrar'
-  const numero = prefijo ? `$${resultado.valor.toLocaleString('es-CL')}` : resultado.valor.toFixed(1)
-  return `${numero}${sufijo ?? ''}`
-}
+import { IndicadorCard } from '@/components/platform/dashboard/IndicadorCard'
 
 export function IndicadoresResumenTabla({ indicadores }: { indicadores: IndicadorResultados }) {
   return (
-    <table className="w-full border-collapse text-sm">
-      <thead>
-        <tr className="border-b border-border text-left">
-          <th className="py-2 font-medium text-muted-foreground">Indicador</th>
-          <th className="py-2 font-medium text-muted-foreground">Valor</th>
-        </tr>
-      </thead>
-      <tbody>
-        {FILAS.map((fila) => (
-          <tr key={fila.clave} className="border-b border-border/50">
-            <td className="py-2 text-foreground">{fila.etiqueta}</td>
-            <td className="py-2 text-foreground">
-              {formatearValor(indicadores[fila.clave], fila.prefijo, fila.sufijo)}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <IndicadorCard
+        titulo="Tasa de ausentismo"
+        icon={CalendarX}
+        resultado={indicadores.tasaAusentismo}
+        sufijo="%"
+        etiquetaNumerador="Días perdidos"
+        etiquetaDenominador="Días programados"
+      />
+      <IndicadorCard
+        titulo="Frecuencia"
+        icon={Activity}
+        resultado={indicadores.frecuencia}
+        sufijo="%"
+        etiquetaNumerador="Episodios"
+        etiquetaDenominador="Dotación promedio"
+      />
+      <IndicadorCard
+        titulo="Severidad"
+        icon={TrendingDown}
+        resultado={indicadores.severidad}
+        sufijo=" días/episodio"
+        etiquetaNumerador="Días perdidos"
+        etiquetaDenominador="Episodios"
+      />
+      <IndicadorCard
+        titulo="Duración promedio"
+        icon={Clock}
+        resultado={indicadores.duracionPromedio}
+        sufijo=" días"
+        etiquetaNumerador="Días perdidos"
+        etiquetaDenominador="Episodios cerrados"
+      />
+      <IndicadorCard
+        titulo="Reincidencia"
+        icon={Repeat2}
+        resultado={indicadores.reincidencia}
+        sufijo="%"
+        etiquetaNumerador="Personas con 2+ episodios"
+        etiquetaDenominador="Personas con 1+ episodio"
+      />
+      <IndicadorCard
+        titulo="Costo estimado"
+        icon={Wallet}
+        resultado={indicadores.costoEstimado}
+        sufijo="$"
+        etiquetaNumerador="Costo total"
+        etiquetaDenominador="—"
+      />
+    </div>
   )
 }
