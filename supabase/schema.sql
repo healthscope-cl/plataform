@@ -316,6 +316,9 @@ create table personas (
   cargo_id uuid references cargos(id),
   turno_id uuid references turnos(id),
   estado text not null default 'activo' check (estado in ('activo', 'inactivo')),
+  email text,
+  telefono text,
+  fecha_ingreso date,
   unique (tenant_id, rut_hash)
 );
 
