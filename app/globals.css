@@ -7,7 +7,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "Inter", "Inter Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Source Sans 3", "Source Sans 3 Fallback", ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
   --font-heading: "Sora", "Sora Fallback", ui-sans-serif, system-ui, sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
@@ -70,7 +70,7 @@
   --input: #d8dee8;
   --ring: #1455e6;
   --chart-1: #1455e6;
-  --chart-2: #00b8f5;
+  --chart-2: #7c3aed;
   --chart-3: #12c7b4;
   --chart-4: #3d5a80;
   --chart-5: #7c3aed;
