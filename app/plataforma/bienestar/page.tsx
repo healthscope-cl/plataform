@@ -5,8 +5,19 @@ import { getEmpresaActiva } from '@/lib/platform/empresa-activa'
 import { mapEncuestaRespuestaRow } from '@/lib/encuestas/types'
 import { agregarRespuestas } from '@/lib/encuestas/agregar'
 import { CATALOGO_PREGUNTAS } from '@/lib/encuestas/catalogo'
+import { GraficoBienestar } from '@/components/platform/bienestar/GraficoBienestar'
 
 const BIENESTAR_PREGUNTA_IDS = ['estres', 'fatiga', 'sueno', 'carga', 'liderazgo', 'conciliacion', 'clima']
+
+const LABELS_CORTOS: Record<string, string> = {
+  estres: 'Estrés',
+  fatiga: 'Fatiga',
+  sueno: 'Sueño',
+  carga: 'Carga',
+  liderazgo: 'Liderazgo',
+  conciliacion: 'Conciliación',
+  clima: 'Clima',
+}
 
 export default async function BienestarPreventivoPage() {
   const supabase = await createClient()
@@ -42,6 +53,13 @@ export default async function BienestarPreventivoPage() {
     respuestas: respuestas.map((r) => r.respuestas),
   })
 
+  const datosGrafico = BIENESTAR_PREGUNTA_IDS.map((preguntaId) => {
+    const resultado = resultados[preguntaId]
+    return resultado && !('suprimido' in resultado)
+      ? { pregunta: LABELS_CORTOS[preguntaId] ?? preguntaId, promedio: resultado.promedio }
+      : null
+  }).filter((item): item is { pregunta: string; promedio: number } => item !== null)
+
   return (
     <div className="space-y-6">
       <div>
@@ -50,6 +68,11 @@ export default async function BienestarPreventivoPage() {
           Promedio agregado de todas las encuestas de {empresa.nombre}, sin filtrar por período.
         </p>
       </div>
+      {datosGrafico.length > 0 ? (
+        <GraficoBienestar datos={datosGrafico} />
+      ) : (
+        <p className="text-sm text-muted-foreground">Sin datos suficientes para graficar todavía.</p>
+      )}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {BIENESTAR_PREGUNTA_IDS.map((preguntaId) => {
           const pregunta = CATALOGO_PREGUNTAS.find((p) => p.id === preguntaId)
