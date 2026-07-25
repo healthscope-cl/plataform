@@ -2,7 +2,11 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getEmpresaActiva } from '@/lib/platform/empresa-activa'
 import { mapEpisodioRow } from '@/lib/ingestion/types'
+import type { TipoAdministrativoClave } from '@/lib/ingestion/types'
+import { computeIndicadoresPorPersona } from '@/lib/indicators/porPersona'
 import { AusenciasTable, type EpisodioFila } from '@/components/platform/ausencias/AusenciasTable'
+
+const COSTO_PROMEDIO_DIARIO = 40000
 
 export default async function AusenciasPage() {
   const supabase = await createClient()
@@ -23,8 +27,12 @@ export default async function AusenciasPage() {
   const personas = (personaRows ?? []).map((row) => ({ id: row.id as string, codigo: row.codigo as string }))
   const personaIds = personas.map((p) => p.id)
 
-  const { data: tipoRows } = await supabase.from('tipos_administrativos').select('id, nombre')
-  const tipos = (tipoRows ?? []).map((row) => ({ id: row.id as string, nombre: row.nombre as string }))
+  const { data: tipoRows } = await supabase.from('tipos_administrativos').select('id, clave, nombre')
+  const tipos = (tipoRows ?? []).map((row) => ({
+    id: row.id as string,
+    clave: row.clave as TipoAdministrativoClave,
+    nombre: row.nombre as string,
+  }))
 
   const { data: episodioRows } =
     personaIds.length > 0
@@ -37,17 +45,29 @@ export default async function AusenciasPage() {
       : { data: [] }
   const episodios = (episodioRows ?? []).map(mapEpisodioRow)
 
-  const episodiosFilas: EpisodioFila[] = episodios.map((episodio) => ({
-    id: episodio.id,
-    personaCodigo: personas.find((p) => p.id === episodio.personaId)?.codigo ?? episodio.personaId,
-    tipoAdministrativoNombre:
-      tipos.find((t) => t.id === episodio.tipoAdministrativoId)?.nombre ?? episodio.tipoAdministrativoId,
-    fechaInicio: episodio.fechaInicio,
-    fechaFin: episodio.fechaFin,
-    dias: episodio.dias,
-    estado: episodio.estado,
-    clasificacionAnalitica: episodio.clasificacionAnalitica,
-  }))
+  const costoPorPersona = new Map(
+    computeIndicadoresPorPersona({
+      personas,
+      episodios,
+      costoPromedioDiario: COSTO_PROMEDIO_DIARIO,
+    }).map((indicador) => [indicador.id, indicador.costoEstimado])
+  )
+
+  const episodiosFilas: EpisodioFila[] = episodios.map((episodio) => {
+    const tipo = tipos.find((t) => t.id === episodio.tipoAdministrativoId)
+    return {
+      id: episodio.id,
+      personaCodigo: personas.find((p) => p.id === episodio.personaId)?.codigo ?? episodio.personaId,
+      tipoAdministrativoNombre: tipo?.nombre ?? episodio.tipoAdministrativoId,
+      tipoAdministrativoClave: tipo?.clave ?? 'otros',
+      fechaInicio: episodio.fechaInicio,
+      fechaFin: episodio.fechaFin,
+      dias: episodio.dias,
+      estado: episodio.estado,
+      clasificacionAnalitica: episodio.clasificacionAnalitica,
+      costoEstimadoPersona: costoPorPersona.get(episodio.personaId) ?? 0,
+    }
+  })
 
   return (
     <div className="space-y-6">

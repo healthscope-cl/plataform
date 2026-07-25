@@ -1,10 +1,12 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import type { ClasificacionAnalitica } from '@/lib/ingestion/types'
+import { Fragment, useMemo, useState } from 'react'
+import type { ClasificacionAnalitica, TipoAdministrativoClave } from '@/lib/ingestion/types'
+import { accionSugerida } from '@/lib/ingestion/accionSugerida'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
 
 const CLASIFICACION_LABELS: Record<ClasificacionAnalitica, string> = {
   corto: 'Corto',
@@ -24,16 +26,19 @@ export type EpisodioFila = {
   id: string
   personaCodigo: string
   tipoAdministrativoNombre: string
+  tipoAdministrativoClave: TipoAdministrativoClave
   fechaInicio: string
   fechaFin: string | null
   dias: number
   estado: 'abierto' | 'cerrado'
   clasificacionAnalitica: ClasificacionAnalitica
+  costoEstimadoPersona: number
 }
 
 export function AusenciasTable({ episodios }: { episodios: EpisodioFila[] }) {
   const [tipoFiltro, setTipoFiltro] = useState('__todos__')
   const [estadoFiltro, setEstadoFiltro] = useState('__todos__')
+  const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const tiposDisponibles = useMemo(
     () => Array.from(new Set(episodios.map((e) => e.tipoAdministrativoNombre))).sort(),
@@ -104,20 +109,59 @@ export function AusenciasTable({ episodios }: { episodios: EpisodioFila[] }) {
             <TableHead>Días</TableHead>
             <TableHead>Estado</TableHead>
             <TableHead>Clasificación</TableHead>
+            <TableHead>Acción sugerida</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {episodiosFiltrados.map((episodio) => (
-            <TableRow key={episodio.id}>
-              <TableCell>{episodio.personaCodigo}</TableCell>
-              <TableCell>{episodio.tipoAdministrativoNombre}</TableCell>
-              <TableCell>{episodio.fechaInicio}</TableCell>
-              <TableCell>{episodio.fechaFin ?? '—'}</TableCell>
-              <TableCell>{episodio.dias}</TableCell>
-              <TableCell className="capitalize">{episodio.estado}</TableCell>
-              <TableCell>{CLASIFICACION_LABELS[episodio.clasificacionAnalitica]}</TableCell>
-            </TableRow>
-          ))}
+          {episodiosFiltrados.map((episodio) => {
+            const expandido = expandedId === episodio.id
+            const plan = accionSugerida({
+              tipoAdministrativo: episodio.tipoAdministrativoClave,
+              clasificacionAnalitica: episodio.clasificacionAnalitica,
+            })
+            return (
+              <Fragment key={episodio.id}>
+                <TableRow>
+                  <TableCell>{episodio.personaCodigo}</TableCell>
+                  <TableCell>{episodio.tipoAdministrativoNombre}</TableCell>
+                  <TableCell>{episodio.fechaInicio}</TableCell>
+                  <TableCell>{episodio.fechaFin ?? '—'}</TableCell>
+                  <TableCell>{episodio.dias}</TableCell>
+                  <TableCell className="capitalize">{episodio.estado}</TableCell>
+                  <TableCell>{CLASIFICACION_LABELS[episodio.clasificacionAnalitica]}</TableCell>
+                  <TableCell>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setExpandedId(expandido ? null : episodio.id)}
+                    >
+                      {expandido ? 'Ocultar plan' : 'Ver plan'}
+                    </Button>
+                  </TableCell>
+                </TableRow>
+                {expandido ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="whitespace-normal bg-muted/30">
+                      <div className="space-y-1.5 py-2 text-sm">
+                        <p>
+                          <span className="font-medium text-foreground">Acción sugerida:</span> {plan.accion}
+                        </p>
+                        <p>
+                          <span className="font-medium text-foreground">Responsable:</span> {plan.responsable}
+                        </p>
+                        <p>
+                          <span className="font-medium text-foreground">Costo estimado de la persona:</span> $
+                          {episodio.costoEstimadoPersona.toLocaleString('es-CL')}
+                        </p>
+                        <p className="text-xs text-muted-foreground">{plan.limitaciones}</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : null}
+              </Fragment>
+            )
+          })}
         </TableBody>
       </Table>
     </div>
