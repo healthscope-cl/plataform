@@ -5,7 +5,8 @@ import { mapIntervencionRow } from '@/lib/intervenciones/types'
 import { mapEncuestaRespuestaRow } from '@/lib/encuestas/types'
 import { mapEventoSeguridadRow } from '@/lib/seguridad/types'
 import { CATALOGO_PREGUNTAS } from '@/lib/encuestas/catalogo'
-import { medirAntesDespues, type ResultadoMedicion } from '@/lib/campanas/medicion'
+import { medirAntesDespues, resultadoMedicionAValor, type ResultadoMedicion } from '@/lib/campanas/medicion'
+import { GraficoAntesDespues } from '@/components/platform/charts/GraficoAntesDespues'
 
 const ESTADO_LABELS: Record<string, string> = {
   planificada: 'Planificada',
@@ -95,6 +96,17 @@ export default async function SeguimientoIntervencionPage({ params }: { params: 
 
       <div>
         <h2 className="font-heading text-lg font-semibold text-foreground">Seguimiento de encuesta</h2>
+        {seguimientoEncuesta &&
+        resultadoMedicionAValor(seguimientoEncuesta.antes) !== null &&
+        resultadoMedicionAValor(seguimientoEncuesta.despues) !== null ? (
+          <div className="mt-2">
+            <GraficoAntesDespues
+              antes={resultadoMedicionAValor(seguimientoEncuesta.antes)!}
+              despues={resultadoMedicionAValor(seguimientoEncuesta.despues)!}
+              unidad={seguimientoEncuesta.pregunta}
+            />
+          </div>
+        ) : null}
         {seguimientoEncuesta ? (
           <div className="mt-2 grid gap-4 sm:grid-cols-2">
             <div className="rounded-2xl border border-border bg-card p-5">
@@ -115,6 +127,9 @@ export default async function SeguimientoIntervencionPage({ params }: { params: 
 
       <div>
         <h2 className="font-heading text-lg font-semibold text-foreground">Seguimiento de seguridad</h2>
+        <div className="mt-2">
+          <GraficoAntesDespues antes={eventosAntes} despues={eventosDespues} unidad="Eventos de seguridad" />
+        </div>
         <div className="mt-2 grid gap-4 sm:grid-cols-2">
           <div className="rounded-2xl border border-border bg-card p-5">
             <p className="text-sm text-muted-foreground">Eventos antes</p>
