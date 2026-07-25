@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { CalendarX, Activity, TrendingDown, Clock, Repeat2, Wallet } from 'lucide-react'
 import { computeIndicadores, type IndicadorResultados } from '@/lib/indicators/aggregate'
 import { computeIndicadoresPorPersona } from '@/lib/indicators/porPersona'
 import { filtrarPersonas, type FiltroGrupo } from '@/lib/indicators/filtroPersonas'
@@ -254,6 +255,7 @@ export function ResumenInteractivo({
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <IndicadorCard
           titulo="Tasa de ausentismo"
+          icon={CalendarX}
           resultado={resultados.tasaAusentismo}
           sufijo="%"
           etiquetaNumerador="Días perdidos"
@@ -263,6 +265,7 @@ export function ResumenInteractivo({
         />
         <IndicadorCard
           titulo="Frecuencia"
+          icon={Activity}
           resultado={resultados.frecuencia}
           sufijo="%"
           etiquetaNumerador="Episodios"
@@ -272,6 +275,7 @@ export function ResumenInteractivo({
         />
         <IndicadorCard
           titulo="Severidad"
+          icon={TrendingDown}
           resultado={resultados.severidad}
           sufijo=" días/episodio"
           etiquetaNumerador="Días perdidos"
@@ -281,6 +285,7 @@ export function ResumenInteractivo({
         />
         <IndicadorCard
           titulo="Duración promedio"
+          icon={Clock}
           resultado={resultados.duracionPromedio}
           sufijo=" días"
           etiquetaNumerador="Días perdidos"
@@ -290,6 +295,7 @@ export function ResumenInteractivo({
         />
         <IndicadorCard
           titulo="Reincidencia"
+          icon={Repeat2}
           resultado={resultados.reincidencia}
           sufijo="%"
           etiquetaNumerador="Personas con 2+ episodios"
@@ -299,6 +305,7 @@ export function ResumenInteractivo({
         />
         <IndicadorCard
           titulo="Costo estimado"
+          icon={Wallet}
           resultado={resultados.costoEstimado}
           sufijo="$"
           etiquetaNumerador="Costo total"

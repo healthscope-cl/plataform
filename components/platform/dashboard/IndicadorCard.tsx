@@ -1,3 +1,4 @@
+import type { LucideIcon } from 'lucide-react'
 import type { IndicadorValor } from '@/lib/indicators/formulas'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { IndicadorMiniChart } from './IndicadorMiniChart'
@@ -31,6 +32,7 @@ function DeltaBadge({ cambio }: { cambio: IndicadorValor }) {
 
 export function IndicadorCard({
   titulo,
+  icon: Icon,
   resultado,
   sufijo,
   etiquetaNumerador,
@@ -39,6 +41,7 @@ export function IndicadorCard({
   valorBase,
 }: {
   titulo: string
+  icon: LucideIcon
   resultado: IndicadorValor
   sufijo: string
   etiquetaNumerador: string
@@ -47,8 +50,13 @@ export function IndicadorCard({
   valorBase?: number | null
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-5">
-      <p className="text-sm text-muted-foreground">{titulo}</p>
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
+      <div className="flex items-center gap-2.5">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <Icon aria-hidden="true" className="h-4 w-4" />
+        </span>
+        <p className="text-sm text-muted-foreground">{titulo}</p>
+      </div>
       {'suprimido' in resultado ? (
         <div className="mt-3 flex items-start gap-2">
           <svg aria-hidden="true" viewBox="0 0 16 16" className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground">
