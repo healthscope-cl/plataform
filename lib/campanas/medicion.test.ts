@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { medirAntesDespues } from './medicion'
+import { medirAntesDespues, resultadoMedicionAValor } from './medicion'
 
 describe('medirAntesDespues', () => {
   it('calcula el promedio correcto antes y después cuando hay suficientes valores en cada lado', () => {
@@ -51,5 +51,23 @@ describe('medirAntesDespues', () => {
     const valores = Array.from({ length: 5 }, () => ({ valor: 5, fecha: '2026-02-15' }))
     const resultado = medirAntesDespues({ valores, fechaInicio: '2026-02-01', fechaFin: '2026-02-15' })
     expect(resultado.despues).toEqual({ sinDatos: true })
+  })
+})
+
+describe('resultadoMedicionAValor', () => {
+  it('devuelve el promedio cuando el resultado tiene datos', () => {
+    expect(resultadoMedicionAValor({ promedio: 3.5, cantidad: 8 })).toBe(3.5)
+  })
+
+  it('devuelve null cuando el resultado está suprimido', () => {
+    expect(resultadoMedicionAValor({ suprimido: true })).toBeNull()
+  })
+
+  it('devuelve null cuando no hay datos', () => {
+    expect(resultadoMedicionAValor({ sinDatos: true })).toBeNull()
+  })
+
+  it('devuelve null cuando el resultado es null', () => {
+    expect(resultadoMedicionAValor(null)).toBeNull()
   })
 })

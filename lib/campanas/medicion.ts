@@ -21,6 +21,13 @@ export function medirAntesDespues(input: {
   return { antes, despues }
 }
 
+export function resultadoMedicionAValor(resultado: ResultadoMedicion | null): number | null {
+  if (resultado === null) return null
+  if ('suprimido' in resultado) return null
+  if ('sinDatos' in resultado) return null
+  return resultado.promedio
+}
+
 function calcular(valores: number[]): ResultadoMedicion {
   if (valores.length === 0) return { sinDatos: true }
   if (valores.length < MIN_GROUP_SIZE) return { suprimido: true }
