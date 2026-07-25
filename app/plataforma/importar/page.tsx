@@ -38,6 +38,9 @@ function toMappedRows(
     unidad: string | null
     cargo: string | null
     turno: string | null
+    email: string | null
+    telefono: string | null
+    fechaIngreso: string | null
   }
 > {
   return parsed.rows.map((row) => ({
@@ -51,6 +54,9 @@ function toMappedRows(
     unidad: mapping.unidad ? String(row[mapping.unidad] ?? '') || null : null,
     cargo: mapping.cargo ? String(row[mapping.cargo] ?? '') || null : null,
     turno: mapping.turno ? String(row[mapping.turno] ?? '') || null : null,
+    email: mapping.email ? String(row[mapping.email] ?? '') || null : null,
+    telefono: mapping.telefono ? String(row[mapping.telefono] ?? '') || null : null,
+    fechaIngreso: mapping.fechaIngreso ? String(row[mapping.fechaIngreso] ?? '') || null : null,
   }))
 }
 

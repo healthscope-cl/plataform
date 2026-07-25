@@ -22,6 +22,9 @@ const FIELD_LABELS: Record<CanonicalField, string> = {
   unidad: 'Unidad',
   cargo: 'Cargo',
   turno: 'Turno',
+  email: 'Email',
+  telefono: 'Teléfono',
+  fechaIngreso: 'Fecha de ingreso',
 }
 
 export function ColumnMappingStep({

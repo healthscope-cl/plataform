@@ -43,6 +43,9 @@ export async function POST(request: Request) {
         unidad: string | null
         cargo: string | null
         turno: string | null
+        email: string | null
+        telefono: string | null
+        fechaIngreso: string | null
       }
     >
   }
@@ -231,6 +234,9 @@ export async function POST(request: Request) {
           unidad_id: unidadId,
           cargo_id: cargoId,
           turno_id: turnoId,
+          email: row.email,
+          telefono: row.telefono,
+          fecha_ingreso: row.fechaIngreso,
         })
         .select()
         .single()

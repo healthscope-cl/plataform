@@ -9,6 +9,9 @@ export const CANONICAL_FIELDS = [
   'unidad',
   'cargo',
   'turno',
+  'email',
+  'telefono',
+  'fechaIngreso',
 ] as const
 export type CanonicalField = (typeof CANONICAL_FIELDS)[number]
 
@@ -25,6 +28,9 @@ const ALIASES: Record<CanonicalField, string[]> = {
   unidad: ['unidad', 'area', 'área', 'departamento'],
   cargo: ['cargo', 'puesto', 'posicion', 'posición'],
   turno: ['turno'],
+  email: ['email', 'correo', 'correo electronico', 'correo electrónico'],
+  telefono: ['telefono', 'teléfono', 'celular', 'fono'],
+  fechaIngreso: ['fecha ingreso', 'fecha de ingreso', 'fecha contratacion', 'fecha de contratación'],
 }
 
 export function normalize(value: string): string {
