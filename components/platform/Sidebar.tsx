@@ -27,13 +27,13 @@ export function Sidebar({ rolClave }: { rolClave: string }) {
   const isAdmin = isAdminRole(rolClave)
 
   return (
-    <nav className="w-60 shrink-0 border-r border-border bg-card p-4 print:hidden">
+    <nav className="w-60 shrink-0 border-r border-sidebar-border bg-sidebar p-4 print:hidden">
       <ul className="space-y-1">
         {NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin).map((item) => (
           <li key={item.href}>
             <Link
               href={item.href}
-              className="block rounded-md px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
+              className="block rounded-md px-3 py-2 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent"
             >
               {item.label}
             </Link>
