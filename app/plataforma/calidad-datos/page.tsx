@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getEmpresaActiva } from '@/lib/platform/empresa-activa'
+import { importacionIdsPorEmpresa } from '@/lib/ingestion/empresaScope'
 import { mapImportacionRow, mapErrorCalidadRow } from '@/lib/ingestion/types'
 import { calcularIndiceSuficiencia } from '@/lib/suficiencia/calcular'
 import { SuficienciaBanner } from '@/components/platform/dashboard/SuficienciaBanner'
@@ -68,12 +69,19 @@ export default async function CalidadDatosPage() {
     })
   }
 
+  // importaciones has no empresa_id column (only tenant_id) — scope this page's list to the
+  // active empresa via importacionIdsPorEmpresa instead of the raw tenant-wide RLS set, so a
+  // tenant with more than one empresa doesn't see another empresa's import history mixed in.
+  const importacionIdsPermitidas = empresa ? await importacionIdsPorEmpresa(supabase, empresa.id) : new Set<string>()
+
   const { data: importacionRows } = await supabase
     .from('importaciones')
     .select('*')
     .order('created_at', { ascending: false })
     .limit(50)
-  const importaciones = (importacionRows ?? []).map(mapImportacionRow)
+  const importaciones = (importacionRows ?? [])
+    .map(mapImportacionRow)
+    .filter((importacion) => importacionIdsPermitidas.has(importacion.id))
   const importacionIds = importaciones.map((i) => i.id)
 
   const { data: errorRows } =
