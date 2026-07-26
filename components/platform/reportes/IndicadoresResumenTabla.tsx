@@ -1,5 +1,6 @@
 import { CalendarX, Activity, TrendingDown, Clock, Repeat2, Wallet } from 'lucide-react'
 import type { IndicadorResultados } from '@/lib/indicators/aggregate'
+import { INDICADOR_COLORS } from '@/lib/indicators/colors'
 import { IndicadorCard } from '@/components/platform/dashboard/IndicadorCard'
 
 export function IndicadoresResumenTabla({ indicadores }: { indicadores: IndicadorResultados }) {
@@ -12,6 +13,7 @@ export function IndicadoresResumenTabla({ indicadores }: { indicadores: Indicado
         sufijo="%"
         etiquetaNumerador="Días perdidos"
         etiquetaDenominador="Días programados"
+        color={INDICADOR_COLORS.tasaAusentismo}
       />
       <IndicadorCard
         titulo="Frecuencia"
@@ -20,6 +22,7 @@ export function IndicadoresResumenTabla({ indicadores }: { indicadores: Indicado
         sufijo="%"
         etiquetaNumerador="Episodios"
         etiquetaDenominador="Dotación promedio"
+        color={INDICADOR_COLORS.frecuencia}
       />
       <IndicadorCard
         titulo="Severidad"
@@ -28,6 +31,7 @@ export function IndicadoresResumenTabla({ indicadores }: { indicadores: Indicado
         sufijo=" días/episodio"
         etiquetaNumerador="Días perdidos"
         etiquetaDenominador="Episodios"
+        color={INDICADOR_COLORS.severidad}
       />
       <IndicadorCard
         titulo="Duración promedio"
@@ -36,6 +40,7 @@ export function IndicadoresResumenTabla({ indicadores }: { indicadores: Indicado
         sufijo=" días"
         etiquetaNumerador="Días perdidos"
         etiquetaDenominador="Episodios cerrados"
+        color={INDICADOR_COLORS.duracionPromedio}
       />
       <IndicadorCard
         titulo="Reincidencia"
@@ -44,6 +49,7 @@ export function IndicadoresResumenTabla({ indicadores }: { indicadores: Indicado
         sufijo="%"
         etiquetaNumerador="Personas con 2+ episodios"
         etiquetaDenominador="Personas con 1+ episodio"
+        color={INDICADOR_COLORS.reincidencia}
       />
       <IndicadorCard
         titulo="Costo estimado"
@@ -52,6 +58,7 @@ export function IndicadoresResumenTabla({ indicadores }: { indicadores: Indicado
         sufijo="$"
         etiquetaNumerador="Costo total"
         etiquetaDenominador="—"
+        color={INDICADOR_COLORS.costoEstimado}
       />
     </div>
   )

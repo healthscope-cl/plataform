@@ -39,6 +39,7 @@ export function IndicadorCard({
   etiquetaDenominador,
   cambio,
   valorBase,
+  color = 'var(--primary)',
 }: {
   titulo: string
   icon: LucideIcon
@@ -48,12 +49,19 @@ export function IndicadorCard({
   etiquetaDenominador: string
   cambio?: IndicadorValor | null
   valorBase?: number | null
+  // Fixed per-indicator identity color (never reassigned by sort/filter) — see the shared
+  // INDICADOR_COLORS map in ResumenInteractivo/IndicadoresResumenTabla, the two call sites.
+  color?: string
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
-      <div className="flex items-center gap-2.5">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-          <Icon aria-hidden="true" className="h-4 w-4" />
+    <div className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg">
+      <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1" style={{ background: color }} />
+      <div className="flex items-center gap-3">
+        <span
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+          style={{ background: `color-mix(in oklab, ${color} 14%, transparent)`, color }}
+        >
+          <Icon aria-hidden="true" className="h-5 w-5" />
         </span>
         <p className="text-sm text-muted-foreground">{titulo}</p>
       </div>
@@ -70,8 +78,10 @@ export function IndicadorCard({
       ) : (
         <>
           <Tooltip>
-            <TooltipTrigger render={<div className="mt-1 flex items-baseline gap-1.5 text-left" tabIndex={0} />}>
-              <p className="font-heading text-3xl font-semibold text-foreground">{formatValor(resultado.valor, sufijo)}</p>
+            <TooltipTrigger render={<div className="mt-2 flex items-baseline gap-1.5 text-left" tabIndex={0} />}>
+              <p className="font-heading text-3xl font-semibold tracking-tight text-foreground">
+                {formatValor(resultado.valor, sufijo)}
+              </p>
               <svg aria-hidden="true" viewBox="0 0 16 16" className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70">
                 <path
                   fill="currentColor"

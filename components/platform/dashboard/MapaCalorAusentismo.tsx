@@ -19,8 +19,8 @@ function CeldaSuprimida() {
     <Tooltip>
       <TooltipTrigger
         render={
-          <td className="border border-border bg-muted/40 p-0 text-center align-middle" tabIndex={0}>
-            <span className="flex h-12 w-full items-center justify-center">
+          <td className="p-1.5 text-center align-middle" tabIndex={0}>
+            <span className="flex h-12 w-full items-center justify-center rounded-lg bg-muted/50">
               <svg aria-hidden="true" viewBox="0 0 16 16" className="h-3.5 w-3.5 text-muted-foreground">
                 <path
                   fill="currentColor"
@@ -46,23 +46,25 @@ export function MapaCalorAusentismo({ filas }: { filas: FilaMapaCalor[] }) {
         <h2 className="font-heading text-lg font-semibold text-foreground">Mapa de calor — tasa de ausentismo</h2>
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <span>Menor</span>
-          {RAMPA.map((color) => (
-            <span key={color} className="h-3 w-5 rounded-sm" style={{ background: color }} />
-          ))}
+          <span className="flex overflow-hidden rounded-full">
+            {RAMPA.map((color) => (
+              <span key={color} className="h-3 w-5" style={{ background: color }} />
+            ))}
+          </span>
           <span>Mayor</span>
         </div>
       </div>
-      <div className="mt-3 overflow-x-auto">
-        <table className="w-full border-collapse text-sm">
+      <div className="mt-4 overflow-x-auto">
+        <table className="w-full border-separate [border-spacing:6px]">
           <thead>
             <tr>
-              <th className="border border-border p-2 text-left text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              <th className="p-1.5 text-left text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                 Sucursal
               </th>
               {periodos.map((label, i) => (
                 <th
                   key={i}
-                  className="border border-border p-2 text-center text-xs font-semibold tracking-wide text-muted-foreground uppercase"
+                  className="p-1.5 text-center text-xs font-semibold tracking-wide text-muted-foreground uppercase"
                 >
                   {label}
                 </th>
@@ -72,7 +74,9 @@ export function MapaCalorAusentismo({ filas }: { filas: FilaMapaCalor[] }) {
           <tbody>
             {filas.map((fila) => (
               <tr key={fila.sucursalId}>
-                <td className="border border-border p-2 font-medium text-foreground">{fila.sucursalNombre}</td>
+                <td className="p-1.5 pr-3 text-sm font-medium whitespace-nowrap text-foreground">
+                  {fila.sucursalNombre}
+                </td>
                 {fila.celdas.map((celda, i) => {
                   if ('suprimido' in celda.tasaAusentismo) return <CeldaSuprimida key={i} />
                   const { background, textoClaro } = colorCelda(celda.tasaAusentismo.valor)
@@ -80,12 +84,14 @@ export function MapaCalorAusentismo({ filas }: { filas: FilaMapaCalor[] }) {
                     <Tooltip key={i}>
                       <TooltipTrigger
                         render={
-                          <td
-                            className="border border-border p-0 text-center align-middle tabular-nums"
-                            style={{ background }}
-                            tabIndex={0}
-                          >
-                            <span className={'flex h-12 w-full items-center justify-center' + (textoClaro ? ' text-white' : ' text-foreground')}>
+                          <td className="p-1.5 text-center align-middle tabular-nums" tabIndex={0}>
+                            <span
+                              className={
+                                'flex h-12 w-full items-center justify-center rounded-lg text-sm font-medium transition-transform duration-150 hover:scale-[1.06]' +
+                                (textoClaro ? ' text-white' : ' text-foreground')
+                              }
+                              style={{ background }}
+                            >
                               {celda.tasaAusentismo.valor.toFixed(1)}%
                             </span>
                           </td>

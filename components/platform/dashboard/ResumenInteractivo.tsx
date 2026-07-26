@@ -6,6 +6,7 @@ import { computeIndicadores, type IndicadorResultados } from '@/lib/indicators/a
 import { computeIndicadoresPorPersona } from '@/lib/indicators/porPersona'
 import { filtrarPersonas, type FiltroGrupo } from '@/lib/indicators/filtroPersonas'
 import { cambio, type IndicadorValor } from '@/lib/indicators/formulas'
+import { INDICADOR_COLORS } from '@/lib/indicators/colors'
 import { IndicadorCard } from '@/components/platform/dashboard/IndicadorCard'
 import { PersonaDetalleTable } from '@/components/platform/dashboard/PersonaDetalleTable'
 import { GuardarLineaBaseButton } from '@/components/platform/dashboard/GuardarLineaBaseButton'
@@ -262,6 +263,7 @@ export function ResumenInteractivo({
           etiquetaDenominador="Días programados"
           cambio={cambioDe('tasaAusentismo')}
           valorBase={valorBaseDe('tasaAusentismo')}
+          color={INDICADOR_COLORS.tasaAusentismo}
         />
         <IndicadorCard
           titulo="Frecuencia"
@@ -272,6 +274,7 @@ export function ResumenInteractivo({
           etiquetaDenominador="Dotación promedio"
           cambio={cambioDe('frecuencia')}
           valorBase={valorBaseDe('frecuencia')}
+          color={INDICADOR_COLORS.frecuencia}
         />
         <IndicadorCard
           titulo="Severidad"
@@ -282,6 +285,7 @@ export function ResumenInteractivo({
           etiquetaDenominador="Episodios"
           cambio={cambioDe('severidad')}
           valorBase={valorBaseDe('severidad')}
+          color={INDICADOR_COLORS.severidad}
         />
         <IndicadorCard
           titulo="Duración promedio"
@@ -292,6 +296,7 @@ export function ResumenInteractivo({
           etiquetaDenominador="Episodios cerrados"
           cambio={cambioDe('duracionPromedio')}
           valorBase={valorBaseDe('duracionPromedio')}
+          color={INDICADOR_COLORS.duracionPromedio}
         />
         <IndicadorCard
           titulo="Reincidencia"
@@ -302,6 +307,7 @@ export function ResumenInteractivo({
           etiquetaDenominador="Personas con 1+ episodio"
           cambio={cambioDe('reincidencia')}
           valorBase={valorBaseDe('reincidencia')}
+          color={INDICADOR_COLORS.reincidencia}
         />
         <IndicadorCard
           titulo="Costo estimado"
@@ -312,6 +318,7 @@ export function ResumenInteractivo({
           etiquetaDenominador="—"
           cambio={cambioDe('costoEstimado')}
           valorBase={valorBaseDe('costoEstimado')}
+          color={INDICADOR_COLORS.costoEstimado}
         />
       </div>
 
