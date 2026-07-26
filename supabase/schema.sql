@@ -657,6 +657,33 @@ grant select, insert, update on evaluaciones_ergonomicas to authenticated;
 grant all on evaluaciones_ergonomicas to service_role;
 
 -- ============================================================
+-- ERGONOMICS: autoevaluaciones_ergonomicas (worker self-assessment)
+-- ============================================================
+-- Only service_role writes this table (via /api/autoevaluaciones/enviar) — no anon grants
+-- needed, so this never has to expose `personas` (código/rut_hash/email) to an anonymous
+-- client just to satisfy an RLS check.
+
+create table autoevaluaciones_ergonomicas (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  empresa_id uuid not null references empresas(id) on delete cascade,
+  persona_id uuid not null references personas(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  respuestas jsonb not null,
+  nivel_riesgo text not null check (nivel_riesgo in ('bajo', 'medio', 'alto')),
+  recomendacion text not null,
+  necesita_ayuda boolean not null default false
+);
+
+alter table autoevaluaciones_ergonomicas enable row level security;
+
+create policy "autoevaluaciones_ergonomicas_select_same_tenant" on autoevaluaciones_ergonomicas
+  for select to authenticated using (tenant_id = auth_tenant_id());
+
+grant select on autoevaluaciones_ergonomicas to authenticated;
+grant all on autoevaluaciones_ergonomicas to service_role;
+
+-- ============================================================
 -- INTERVENTIONS: intervenciones
 -- ============================================================
 
