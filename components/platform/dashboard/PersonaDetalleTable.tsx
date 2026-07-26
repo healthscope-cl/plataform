@@ -1,9 +1,11 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import Link from 'next/link'
 import { isAdminRole } from '@/lib/platform/roles'
 import type { IndicadorPersona } from '@/lib/indicators/porPersona'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Button } from '@/components/ui/button'
 
 type Columna = 'diasPerdidos' | 'cantidadEpisodios' | 'costoEstimado'
 
@@ -81,6 +83,7 @@ export function PersonaDetalleTable({
                   </TableHead>
                 )
               })}
+              <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -92,11 +95,18 @@ export function PersonaDetalleTable({
                 <TableCell className="text-right font-semibold text-foreground tabular-nums">
                   {formatCosto(persona.costoEstimado)}
                 </TableCell>
+                <TableCell className="text-right">
+                  <Link href={`/plataforma/personas/${persona.id}`}>
+                    <Button type="button" variant="outline" size="sm">
+                      Ver detalle
+                    </Button>
+                  </Link>
+                </TableCell>
               </TableRow>
             ))}
             {personasOrdenadas.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="py-4 text-center text-muted-foreground">
+                <TableCell colSpan={5} className="py-4 text-center text-muted-foreground">
                   No hay personas para mostrar.
                 </TableCell>
               </TableRow>

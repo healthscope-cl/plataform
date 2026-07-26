@@ -29,6 +29,9 @@ export type Persona = {
   cargoId: string | null
   turnoId: string | null
   estado: 'activo' | 'inactivo'
+  email: string | null
+  telefono: string | null
+  fechaIngreso: string | null
 }
 
 export type Contrato = {
@@ -65,6 +68,9 @@ export function mapPersonaRow(row: {
   cargo_id: string | null
   turno_id: string | null
   estado: 'activo' | 'inactivo'
+  email?: string | null
+  telefono?: string | null
+  fecha_ingreso?: string | null
 }): Persona {
   return {
     id: row.id,
@@ -77,6 +83,9 @@ export function mapPersonaRow(row: {
     cargoId: row.cargo_id,
     turnoId: row.turno_id,
     estado: row.estado,
+    email: row.email ?? null,
+    telefono: row.telefono ?? null,
+    fechaIngreso: row.fecha_ingreso ?? null,
   }
 }
 
