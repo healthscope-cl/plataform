@@ -1,6 +1,7 @@
 import { CalendarX, Activity, TrendingDown, Clock, Repeat2, Wallet } from 'lucide-react'
 import type { IndicadorResultados } from '@/lib/indicators/aggregate'
 import { INDICADOR_COLORS } from '@/lib/indicators/colors'
+import { MAXIMO_GAUGE_TASA_AUSENTISMO, BANDAS_GAUGE_TASA_AUSENTISMO } from '@/lib/indicators/bandasGauge'
 import { IndicadorCard } from '@/components/platform/dashboard/IndicadorCard'
 
 export function IndicadoresResumenTabla({ indicadores }: { indicadores: IndicadorResultados }) {
@@ -14,6 +15,7 @@ export function IndicadoresResumenTabla({ indicadores }: { indicadores: Indicado
         etiquetaNumerador="Días perdidos"
         etiquetaDenominador="Días programados"
         color={INDICADOR_COLORS.tasaAusentismo}
+        gauge={{ maximo: MAXIMO_GAUGE_TASA_AUSENTISMO, bandas: BANDAS_GAUGE_TASA_AUSENTISMO }}
       />
       <IndicadorCard
         titulo="Frecuencia"

@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
 import type { IndicadorValor } from '@/lib/indicators/formulas'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { GaugeChart, type BandaGauge } from '@/components/platform/GaugeChart'
 import { IndicadorMiniChart } from './IndicadorMiniChart'
 
 function formatValor(valor: number, sufijo: string) {
@@ -40,6 +41,7 @@ export function IndicadorCard({
   cambio,
   valorBase,
   color = 'var(--primary)',
+  gauge,
 }: {
   titulo: string
   icon: LucideIcon
@@ -52,6 +54,10 @@ export function IndicadorCard({
   // Fixed per-indicator identity color (never reassigned by sort/filter) — see the shared
   // INDICADOR_COLORS map in ResumenInteractivo/IndicadoresResumenTabla, the two call sites.
   color?: string
+  // Opt-in gauge display for indicators with a genuine bounded real-world band to calibrate
+  // against (see lib/indicators/bandasGauge.ts) — not every indicator gets one; forcing a
+  // gauge onto a metric with no real threshold would be decoration, not signal.
+  gauge?: { maximo: number; bandas: BandaGauge[] }
 }) {
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg">
@@ -75,6 +81,22 @@ export function IndicadorCard({
           </svg>
           <p className="text-sm text-muted-foreground">Grupo insuficiente para mostrar</p>
         </div>
+      ) : gauge ? (
+        <>
+          <div className="mt-1">
+            <GaugeChart
+              valor={resultado.valor}
+              maximo={gauge.maximo}
+              bandas={gauge.bandas}
+              etiqueta={formatValor(resultado.valor, sufijo)}
+            />
+          </div>
+          {cambio ? (
+            <div className="flex justify-center">
+              <DeltaBadge cambio={cambio} />
+            </div>
+          ) : null}
+        </>
       ) : (
         <>
           <Tooltip>

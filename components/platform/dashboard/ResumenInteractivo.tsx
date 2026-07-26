@@ -7,6 +7,7 @@ import { computeIndicadoresPorPersona } from '@/lib/indicators/porPersona'
 import { filtrarPersonas, type FiltroGrupo } from '@/lib/indicators/filtroPersonas'
 import { cambio, type IndicadorValor } from '@/lib/indicators/formulas'
 import { INDICADOR_COLORS } from '@/lib/indicators/colors'
+import { MAXIMO_GAUGE_TASA_AUSENTISMO, BANDAS_GAUGE_TASA_AUSENTISMO } from '@/lib/indicators/bandasGauge'
 import { IndicadorCard } from '@/components/platform/dashboard/IndicadorCard'
 import { PersonaDetalleTable } from '@/components/platform/dashboard/PersonaDetalleTable'
 import { GuardarLineaBaseButton } from '@/components/platform/dashboard/GuardarLineaBaseButton'
@@ -264,6 +265,7 @@ export function ResumenInteractivo({
           cambio={cambioDe('tasaAusentismo')}
           valorBase={valorBaseDe('tasaAusentismo')}
           color={INDICADOR_COLORS.tasaAusentismo}
+          gauge={{ maximo: MAXIMO_GAUGE_TASA_AUSENTISMO, bandas: BANDAS_GAUGE_TASA_AUSENTISMO }}
         />
         <IndicadorCard
           titulo="Frecuencia"

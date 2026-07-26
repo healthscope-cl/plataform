@@ -6,7 +6,7 @@ import { mapEvaluacionErgonomicaRow, mapAutoevaluacionErgonomicaRow } from '@/li
 import { calcularRiesgoGeneral } from '@/lib/ergonomia/riesgoGeneral'
 import { EvaluacionesErgonomicasTable } from '@/components/platform/ergonomia/EvaluacionesErgonomicasTable'
 import { AutoevaluacionesTable, type AutoevaluacionFila } from '@/components/platform/ergonomia/AutoevaluacionesTable'
-import { GaugeChart } from '@/components/platform/GaugeChart'
+import { GaugeChart, BANDAS_NIVEL_RIESGO, MAXIMO_NIVEL_RIESGO } from '@/components/platform/GaugeChart'
 
 const NIVEL_LABEL: Record<string, string> = { bajo: 'Bajo', medio: 'Medio', alto: 'Alto' }
 
@@ -76,6 +76,8 @@ export default async function ErgonomiaPage() {
           <div className="mt-2">
             <GaugeChart
               valor={riesgoGeneral.valorGauge}
+              maximo={MAXIMO_NIVEL_RIESGO}
+              bandas={BANDAS_NIVEL_RIESGO}
               etiqueta={NIVEL_LABEL[riesgoGeneral.nivel]}
               subtitulo={`${evaluaciones.length + autoevaluaciones.length} registros considerados`}
             />

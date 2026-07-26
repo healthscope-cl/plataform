@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { evaluarAutoevaluacion, type RespuestasAutoevaluacion } from '@/lib/ergonomia/autoevaluacion'
 import { Button } from '@/components/ui/button'
-import { GaugeChart } from '@/components/platform/GaugeChart'
+import { GaugeChart, BANDAS_NIVEL_RIESGO, MAXIMO_NIVEL_RIESGO } from '@/components/platform/GaugeChart'
 
 const PREGUNTAS_SI_NO: Array<{ clave: keyof Omit<RespuestasAutoevaluacion, 'molestias'>; texto: string }> = [
   { clave: 'pantallaAlturaOjos', texto: '¿El borde superior de tu pantalla queda a la altura de tus ojos?' },
@@ -76,7 +76,12 @@ export function AutoevaluacionForm({ personaId }: { personaId: string }) {
         <div className="rounded-2xl border border-border bg-card p-5">
           <p className="text-center text-sm text-muted-foreground">Nivel de riesgo detectado</p>
           <div className="mt-2">
-            <GaugeChart valor={NIVEL_VALOR[resultado.nivelRiesgo]} etiqueta={NIVEL_LABEL[resultado.nivelRiesgo]} />
+            <GaugeChart
+              valor={NIVEL_VALOR[resultado.nivelRiesgo]}
+              maximo={MAXIMO_NIVEL_RIESGO}
+              bandas={BANDAS_NIVEL_RIESGO}
+              etiqueta={NIVEL_LABEL[resultado.nivelRiesgo]}
+            />
           </div>
           <p className="mt-3 text-sm text-foreground">{resultado.recomendacion}</p>
         </div>
