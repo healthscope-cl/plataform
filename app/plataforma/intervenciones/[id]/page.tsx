@@ -127,9 +127,13 @@ export default async function SeguimientoIntervencionPage({ params }: { params: 
 
       <div>
         <h2 className="font-heading text-lg font-semibold text-foreground">Seguimiento de seguridad</h2>
-        <div className="mt-2">
-          <GraficoAntesDespues antes={eventosAntes} despues={eventosDespues} unidad="Eventos de seguridad" />
-        </div>
+        {eventosAntes > 0 || eventosDespues > 0 ? (
+          <div className="mt-2">
+            <GraficoAntesDespues antes={eventosAntes} despues={eventosDespues} unidad="Eventos de seguridad" />
+          </div>
+        ) : (
+          <p className="mt-2 text-sm text-muted-foreground">Sin eventos de seguridad registrados.</p>
+        )}
         <div className="mt-2 grid gap-4 sm:grid-cols-2">
           <div className="rounded-2xl border border-border bg-card p-5">
             <p className="text-sm text-muted-foreground">Eventos antes</p>

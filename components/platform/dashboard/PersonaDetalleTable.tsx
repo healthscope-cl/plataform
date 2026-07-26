@@ -63,20 +63,15 @@ export function PersonaDetalleTable({
       <div className="mt-3">
         <Table>
           <TableHeader>
-            <TableRow className="bg-muted/40 hover:bg-muted/40">
-              <TableHead className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                Código
-              </TableHead>
+            <TableRow>
+              <TableHead>Código</TableHead>
               {COLUMNAS.map((columna) => {
                 const direccion = columna.clave === columnaOrden ? (ascendente ? 'ascending' : 'descending') : 'none'
                 return (
-                  <TableHead
-                    key={columna.clave}
-                    className="text-right text-xs font-semibold tracking-wide text-muted-foreground uppercase"
-                  >
+                  <TableHead key={columna.clave} className="text-right">
                     <button
                       type="button"
-                      className="inline-flex items-center gap-1 rounded underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                      className="inline-flex items-center gap-1 rounded font-semibold text-inherit uppercase underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                       onClick={() => alternarOrden(columna.clave)}
                       aria-sort={direccion}
                     >
@@ -89,8 +84,8 @@ export function PersonaDetalleTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {personasOrdenadas.map((persona, indice) => (
-              <TableRow key={persona.id} className={indice % 2 === 1 ? 'bg-muted/30' : undefined}>
+            {personasOrdenadas.map((persona) => (
+              <TableRow key={persona.id}>
                 <TableCell className="font-medium text-foreground">{persona.codigo}</TableCell>
                 <TableCell className="text-right text-foreground tabular-nums">{persona.diasPerdidos}</TableCell>
                 <TableCell className="text-right text-foreground tabular-nums">{persona.cantidadEpisodios}</TableCell>

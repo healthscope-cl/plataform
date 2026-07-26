@@ -79,8 +79,11 @@ export function UsuariosTable({
               <TableCell>{usuario.email}</TableCell>
               <TableCell>{roleName(usuario.rolId)}</TableCell>
               <TableCell>
-                <Badge variant={usuario.estado === 'activo' ? 'default' : 'secondary'}>
-                  {usuario.estado}
+                <Badge
+                  variant={usuario.estado === 'activo' ? 'default' : 'outline'}
+                  className={usuario.estado === 'activo' ? 'bg-success/10 text-success' : undefined}
+                >
+                  {usuario.estado === 'activo' ? 'Activo' : 'Inactivo'}
                 </Badge>
               </TableCell>
               <TableCell className="text-right">
