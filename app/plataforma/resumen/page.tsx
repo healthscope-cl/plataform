@@ -11,6 +11,8 @@ import { SuficienciaBanner } from '@/components/platform/dashboard/SuficienciaBa
 import { mapReglaAlertaRow } from '@/lib/alertas/types'
 import { evaluarReglas } from '@/lib/alertas/evaluar'
 import { AlertasBanner } from '@/components/platform/dashboard/AlertasBanner'
+import { computeMapaCalorAusentismo, generarPeriodosMensuales } from '@/lib/indicators/heatmap'
+import { MapaCalorAusentismo } from '@/components/platform/dashboard/MapaCalorAusentismo'
 
 const COSTOS_DEFAULT = {
   costoPromedioDiario: 40000,
@@ -93,7 +95,7 @@ export default async function ResumenPage() {
     personaIds.length > 0
       ? await supabase
           .from('episodios')
-          .select('persona_id, dias, estado')
+          .select('persona_id, dias, estado, fecha_inicio')
           .in('persona_id', personaIds)
           .gte('fecha_inicio', periodoInicio)
       : { data: [] }
@@ -101,6 +103,7 @@ export default async function ResumenPage() {
     personaId: row.persona_id as string,
     dias: row.dias as number,
     estado: row.estado as 'abierto' | 'cerrado',
+    fechaInicio: row.fecha_inicio as string,
   }))
 
   const { data: importacionReciente } = await supabase
@@ -162,6 +165,14 @@ export default async function ResumenPage() {
   const indicadoresBaseCrudo = ultimaLineaBase?.indicadores
   const indicadoresBase = esIndicadorResultados(indicadoresBaseCrudo) ? indicadoresBaseCrudo : undefined
 
+  const mapaCalor = computeMapaCalorAusentismo({
+    sucursales,
+    unidades,
+    personas,
+    episodios,
+    periodos: generarPeriodosMensuales(periodoFin, 6),
+  })
+
   return (
     <div className="space-y-6">
       <SuficienciaBanner indice={indiceSuficiencia} />
@@ -200,6 +211,8 @@ export default async function ResumenPage() {
         actorId={usuario.id}
         rolClave={rol.clave}
       />
+
+      <MapaCalorAusentismo filas={mapaCalor} />
 
       <p className="text-xs text-muted-foreground">
         Rol: {rol.nombre}. Los costos usan supuestos por defecto (costo promedio diario

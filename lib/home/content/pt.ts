@@ -310,9 +310,9 @@ export const content: HomeContent = {
         respuesta: 'O painel de qualidade de dados mostra completude, erros e avisos antes de gerar indicadores.',
       },
       {
-        pregunta: 'A IA toma decisões automaticamente?',
+        pregunta: 'A HealthScope usa inteligência artificial?',
         respuesta:
-          'Não. A IA apoia com resumos, detecção de anomalias e recomendações explicáveis, sempre com revisão humana e opção de desativação.',
+          'Não. Os alertas e recomendações são gerados por regras fixas e limites configuráveis — não por um modelo de IA treinado — o que os torna transparentes e auditáveis: cada sugestão mostra exatamente qual dado e qual regra a originou. Sempre exigem revisão humana antes de se tornarem uma ação.',
       },
       {
         pregunta: 'Configura-se por filial, turno ou centro de custo?',
