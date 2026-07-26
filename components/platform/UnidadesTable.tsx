@@ -40,9 +40,13 @@ export function UnidadesTable({
   }
 
   async function handleDelete(unidad: Unidad) {
+    if (!window.confirm(`¿Eliminar la unidad "${unidad.nombre}"? Esta acción no se puede deshacer.`)) return
     const supabase = createClient()
     const { error } = await supabase.from('unidades').delete().eq('id', unidad.id)
-    if (error) return
+    if (error) {
+      window.alert(`No se pudo eliminar "${unidad.nombre}": ${error.message}`)
+      return
+    }
     await logAudit(supabase, {
       tenantId,
       actorId,

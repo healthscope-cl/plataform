@@ -21,6 +21,12 @@ const ESTADO_LABEL: Record<EventoSeguridad['estado'], string> = {
   cerrado: 'Cerrado',
 }
 
+const GRAVEDAD_LABEL: Record<EventoSeguridad['gravedad'], string> = {
+  leve: 'Leve',
+  moderada: 'Moderada',
+  grave: 'Grave',
+}
+
 export function EventosSeguridadTable({
   tenantId,
   empresaId,
@@ -85,7 +91,9 @@ export function EventosSeguridadTable({
               <TableCell>{TIPO_LABELS[evento.tipo]}</TableCell>
               <TableCell>{evento.descripcion}</TableCell>
               <TableCell>
-                <Badge variant={evento.gravedad === 'grave' ? 'destructive' : 'outline'}>{evento.gravedad}</Badge>
+                <Badge variant={evento.gravedad === 'grave' ? 'destructive' : 'outline'}>
+                  {GRAVEDAD_LABEL[evento.gravedad]}
+                </Badge>
               </TableCell>
               <TableCell>{evento.fecha}</TableCell>
               <TableCell>

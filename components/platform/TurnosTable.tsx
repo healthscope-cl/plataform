@@ -40,9 +40,13 @@ export function TurnosTable({
   }
 
   async function handleDelete(turno: Turno) {
+    if (!window.confirm(`¿Eliminar el turno "${turno.nombre}"? Esta acción no se puede deshacer.`)) return
     const supabase = createClient()
     const { error } = await supabase.from('turnos').delete().eq('id', turno.id)
-    if (error) return
+    if (error) {
+      window.alert(`No se pudo eliminar "${turno.nombre}": ${error.message}`)
+      return
+    }
     await logAudit(supabase, {
       tenantId,
       actorId,

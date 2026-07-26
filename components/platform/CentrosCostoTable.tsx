@@ -42,9 +42,14 @@ export function CentrosCostoTable({
   }
 
   async function handleDelete(centroCosto: CentroCosto) {
+    if (!window.confirm(`¿Eliminar el centro de costo "${centroCosto.nombre}"? Esta acción no se puede deshacer.`))
+      return
     const supabase = createClient()
     const { error } = await supabase.from('centros_costo').delete().eq('id', centroCosto.id)
-    if (error) return
+    if (error) {
+      window.alert(`No se pudo eliminar "${centroCosto.nombre}": ${error.message}`)
+      return
+    }
     await logAudit(supabase, {
       tenantId,
       actorId,

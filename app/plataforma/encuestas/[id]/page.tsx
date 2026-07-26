@@ -39,7 +39,9 @@ export default async function ResultadosEncuestaPage({ params }: { params: Promi
     <div className="space-y-6">
       <div>
         <h1 className="font-heading text-2xl font-semibold text-foreground">{encuesta.titulo}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{respuestas.length} respuestas recibidas.</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {respuestas.length} {respuestas.length === 1 ? 'respuesta recibida' : 'respuestas recibidas'}.
+        </p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {encuesta.preguntaIds.map((preguntaId) => {

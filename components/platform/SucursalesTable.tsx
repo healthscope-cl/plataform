@@ -40,9 +40,13 @@ export function SucursalesTable({
   }
 
   async function handleDelete(sucursal: Sucursal) {
+    if (!window.confirm(`¿Eliminar la sucursal "${sucursal.nombre}"? Esta acción no se puede deshacer.`)) return
     const supabase = createClient()
     const { error } = await supabase.from('sucursales').delete().eq('id', sucursal.id)
-    if (error) return
+    if (error) {
+      window.alert(`No se pudo eliminar "${sucursal.nombre}": ${error.message}`)
+      return
+    }
 
     await logAudit(supabase, {
       tenantId,

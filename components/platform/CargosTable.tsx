@@ -40,9 +40,13 @@ export function CargosTable({
   }
 
   async function handleDelete(cargo: Cargo) {
+    if (!window.confirm(`¿Eliminar el cargo "${cargo.nombre}"? Esta acción no se puede deshacer.`)) return
     const supabase = createClient()
     const { error } = await supabase.from('cargos').delete().eq('id', cargo.id)
-    if (error) return
+    if (error) {
+      window.alert(`No se pudo eliminar "${cargo.nombre}": ${error.message}`)
+      return
+    }
     await logAudit(supabase, {
       tenantId,
       actorId,
