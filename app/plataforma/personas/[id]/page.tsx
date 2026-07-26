@@ -7,6 +7,7 @@ import { mapPersonaRow, mapEpisodioRow } from '@/lib/ingestion/types'
 import type { TipoAdministrativoClave } from '@/lib/ingestion/types'
 import { computeIndicadoresPorPersona } from '@/lib/indicators/porPersona'
 import { AusenciasTable, type EpisodioFila } from '@/components/platform/ausencias/AusenciasTable'
+import { CopiarLinkAutoevaluacion } from '@/components/ergonomia/CopiarLinkAutoevaluacion'
 
 const COSTO_PROMEDIO_DIARIO = 40000
 
@@ -90,25 +91,28 @@ export default async function PersonaDetallePage({ params }: { params: Promise<{
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading text-2xl font-semibold text-foreground">{persona.codigo}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {persona.estado === 'activo' ? 'Activo' : 'Inactivo'}
-          {unidadRow ? ` — ${unidadRow.nombre as string}` : ''}
-          {cargoRow ? ` — ${cargoRow.nombre as string}` : ''}
-          {turnoRow ? ` — ${turnoRow.nombre as string}` : ''}
-        </p>
-        {persona.email || persona.telefono || persona.fechaIngreso ? (
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="font-heading text-2xl font-semibold text-foreground">{persona.codigo}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {[
-              persona.email,
-              persona.telefono,
-              persona.fechaIngreso ? `Ingreso: ${persona.fechaIngreso}` : null,
-            ]
-              .filter(Boolean)
-              .join(' — ')}
+            {persona.estado === 'activo' ? 'Activo' : 'Inactivo'}
+            {unidadRow ? ` — ${unidadRow.nombre as string}` : ''}
+            {cargoRow ? ` — ${cargoRow.nombre as string}` : ''}
+            {turnoRow ? ` — ${turnoRow.nombre as string}` : ''}
           </p>
-        ) : null}
+          {persona.email || persona.telefono || persona.fechaIngreso ? (
+            <p className="mt-1 text-sm text-muted-foreground">
+              {[
+                persona.email,
+                persona.telefono,
+                persona.fechaIngreso ? `Ingreso: ${persona.fechaIngreso}` : null,
+              ]
+                .filter(Boolean)
+                .join(' — ')}
+            </p>
+          ) : null}
+        </div>
+        <CopiarLinkAutoevaluacion personaId={persona.id} />
       </div>
 
       <div>

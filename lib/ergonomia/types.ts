@@ -16,6 +16,42 @@ export type EvaluacionErgonomica = {
   estado: EstadoEvaluacion
 }
 
+export type AutoevaluacionErgonomica = {
+  id: string
+  tenantId: string
+  empresaId: string
+  personaId: string
+  createdAt: string
+  respuestas: Record<string, unknown>
+  nivelRiesgo: NivelRiesgo
+  recomendacion: string
+  necesitaAyuda: boolean
+}
+
+export function mapAutoevaluacionErgonomicaRow(row: {
+  id: string
+  tenant_id: string
+  empresa_id: string
+  persona_id: string
+  created_at: string
+  respuestas: Record<string, unknown>
+  nivel_riesgo: string
+  recomendacion: string
+  necesita_ayuda: boolean
+}): AutoevaluacionErgonomica {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    empresaId: row.empresa_id,
+    personaId: row.persona_id,
+    createdAt: row.created_at,
+    respuestas: row.respuestas,
+    nivelRiesgo: row.nivel_riesgo as NivelRiesgo,
+    recomendacion: row.recomendacion,
+    necesitaAyuda: row.necesita_ayuda,
+  }
+}
+
 export function mapEvaluacionErgonomicaRow(row: {
   id: string
   tenant_id: string
