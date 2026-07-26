@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { evaluarAutoevaluacion, type RespuestasAutoevaluacion } from '@/lib/ergonomia/autoevaluacion'
 import { Button } from '@/components/ui/button'
+import { GaugeChart } from '@/components/platform/GaugeChart'
 
 const PREGUNTAS_SI_NO: Array<{ clave: keyof Omit<RespuestasAutoevaluacion, 'molestias'>; texto: string }> = [
   { clave: 'pantallaAlturaOjos', texto: '¿El borde superior de tu pantalla queda a la altura de tus ojos?' },
@@ -18,6 +19,7 @@ const OPCIONES_MOLESTIAS: Array<{ valor: RespuestasAutoevaluacion['molestias']; 
 ]
 
 const NIVEL_LABEL: Record<string, string> = { bajo: 'Bajo', medio: 'Medio', alto: 'Alto' }
+const NIVEL_VALOR: Record<string, number> = { bajo: 20, medio: 50, alto: 85 }
 
 export function AutoevaluacionForm({ personaId }: { personaId: string }) {
   const [respuestas, setRespuestas] = useState<Partial<RespuestasAutoevaluacion>>({})
@@ -72,10 +74,10 @@ export function AutoevaluacionForm({ personaId }: { personaId: string }) {
     return (
       <div className="space-y-4">
         <div className="rounded-2xl border border-border bg-card p-5">
-          <p className="text-sm text-muted-foreground">Nivel de riesgo detectado</p>
-          <p className="mt-1 font-heading text-2xl font-semibold text-foreground">
-            {NIVEL_LABEL[resultado.nivelRiesgo]}
-          </p>
+          <p className="text-center text-sm text-muted-foreground">Nivel de riesgo detectado</p>
+          <div className="mt-2">
+            <GaugeChart valor={NIVEL_VALOR[resultado.nivelRiesgo]} etiqueta={NIVEL_LABEL[resultado.nivelRiesgo]} />
+          </div>
           <p className="mt-3 text-sm text-foreground">{resultado.recomendacion}</p>
         </div>
         <label className="flex items-start gap-2 text-sm text-foreground">

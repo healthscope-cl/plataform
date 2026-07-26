@@ -3,8 +3,12 @@ import { createClient } from '@/lib/supabase/server'
 import { mapUsuarioRow, mapRolRow } from '@/lib/platform/types'
 import { getEmpresaActiva } from '@/lib/platform/empresa-activa'
 import { mapEvaluacionErgonomicaRow, mapAutoevaluacionErgonomicaRow } from '@/lib/ergonomia/types'
+import { calcularRiesgoGeneral } from '@/lib/ergonomia/riesgoGeneral'
 import { EvaluacionesErgonomicasTable } from '@/components/platform/ergonomia/EvaluacionesErgonomicasTable'
 import { AutoevaluacionesTable, type AutoevaluacionFila } from '@/components/platform/ergonomia/AutoevaluacionesTable'
+import { GaugeChart } from '@/components/platform/GaugeChart'
+
+const NIVEL_LABEL: Record<string, string> = { bajo: 'Bajo', medio: 'Medio', alto: 'Alto' }
 
 export default async function ErgonomiaPage() {
   const supabase = await createClient()
@@ -57,9 +61,27 @@ export default async function ErgonomiaPage() {
       necesitaAyuda: autoevaluacion.necesitaAyuda,
     }))
 
+  const riesgoGeneral = calcularRiesgoGeneral([
+    ...evaluaciones.map((e) => e.nivelRiesgo),
+    ...autoevaluaciones.map((a) => a.nivelRiesgo),
+  ])
+
   return (
     <div className="space-y-6">
       <h1 className="font-heading text-2xl font-semibold text-foreground">Ergonomía</h1>
+
+      {riesgoGeneral.nivel ? (
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <p className="text-center text-sm text-muted-foreground">Riesgo ergonómico general de la empresa</p>
+          <div className="mt-2">
+            <GaugeChart
+              valor={riesgoGeneral.valorGauge}
+              etiqueta={NIVEL_LABEL[riesgoGeneral.nivel]}
+              subtitulo={`${evaluaciones.length + autoevaluaciones.length} registros considerados`}
+            />
+          </div>
+        </div>
+      ) : null}
 
       <div>
         <h2 className="font-heading text-lg font-semibold text-foreground">Autoevaluaciones de trabajadores</h2>
